@@ -1,6 +1,6 @@
 package com.aliothmoon.maameow.constant
 
-object Packages {
+object Packages : Iterable<Map.Entry<String, String>> {
     private val packageName = mapOf(
         "Official" to "com.hypergryph.arknights",
         "Bilibili" to "com.hypergryph.arknights.bilibili",
@@ -11,4 +11,8 @@ object Packages {
     )
 
     operator fun get(type: String): String? = packageName[type]
+
+    override fun iterator(): Iterator<Map.Entry<String, String>> {
+        return packageName.iterator()
+    }
 }

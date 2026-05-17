@@ -9,6 +9,6 @@ object AppOpsHelper {
     }
     fun resetPlayAudioOp(packageName: String?): Boolean {
         if (packageName.isNullOrBlank()) return false
-        return RemoteUtils.shellExec("appops set $packageName PLAY_AUDIO default") == 0
+        return RemoteUtils.shellExec("appops set $packageName PLAY_AUDIO allow") == 0
     }
 }

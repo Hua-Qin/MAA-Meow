@@ -10,6 +10,7 @@ import com.aliothmoon.maameow.constant.DefaultDisplayConfig
 import com.aliothmoon.maameow.constant.DisplayMode
 import com.aliothmoon.maameow.maa.InputControlUtils
 import android.content.Intent
+import com.aliothmoon.maameow.constant.Packages
 import com.aliothmoon.maameow.remote.internal.ActivityUtils
 import com.aliothmoon.maameow.remote.internal.AppOpsHelper
 import com.aliothmoon.maameow.remote.internal.PermissionGrantHelper
@@ -51,6 +52,12 @@ class RemoteServiceImpl : RemoteService.Stub() {
                 AppOpsHelper.resetPlayAudioOp(packageName)
             }
         }
+    }
+
+    init {
+        Runtime.getRuntime().addShutdownHook(Thread {
+            runCatching { performEmergencyCleanup() }
+        }.apply { name = "remote-shutdown-hook" })
     }
 
     private val virtualDisplayMode = AtomicInteger(DisplayMode.PRIMARY)
@@ -202,6 +209,7 @@ class RemoteServiceImpl : RemoteService.Stub() {
                     PowerController.startUserActivityKeepAlive(displayId)
                 }
             }
+
             else -> DefaultDisplayConfig.DISPLAY_NONE
         }
     }
@@ -225,11 +233,7 @@ class RemoteServiceImpl : RemoteService.Stub() {
             Ln.w("$TAG: setPlayAudioOpAllowed skipped tracking update for $packageName")
             return
         }
-        if (isAllowed) {
-            trackedAudioPackages.remove(packageName)
-        } else {
-            trackedAudioPackages.add(packageName)
-        }
+        trackedAudioPackages.add(packageName)
     }
 
     override fun isAppAlive(packageName: String): Int {
@@ -264,7 +268,7 @@ class RemoteServiceImpl : RemoteService.Stub() {
             FakeContext.get().packageManager.getPackageInfo(packageName, 0)
             true
         } catch (e: Exception) {
-            Ln.w("$TAG: isPackageInstalled: $packageName not found")
+            Ln.w("$TAG: isPackageInstalled: $packageName not found", e)
             false
         }
     }
