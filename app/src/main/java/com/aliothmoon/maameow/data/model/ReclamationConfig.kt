@@ -11,6 +11,10 @@ import kotlinx.serialization.json.putJsonArray
 
 /**
  * 生息演算配置
+ *
+ * mode 字段含义按 theme 决定:
+ * - Tales: 0 = ProsperityNoSave(无存档刷点), 1 = ProsperityInSave(有存档组装)
+ * - RelaunchAnchor: 0 = RA-1, 1 = RA-15
  */
 @Serializable
 data class ReclamationConfig(
@@ -24,6 +28,7 @@ data class ReclamationConfig(
     companion object {
         val THEME_KEYS = listOf("Tales", "Fire", "RelaunchAnchor")
         val MODE_VALUES = listOf(0, 1)
+        val RELAUNCH_ANCHOR_MODE_VALUES = listOf(0, 1)
         val INCREMENT_MODE_VALUES = listOf(0, 1)
         const val DEFAULT_TOOL_TO_CRAFT = "荧光棒"
     }

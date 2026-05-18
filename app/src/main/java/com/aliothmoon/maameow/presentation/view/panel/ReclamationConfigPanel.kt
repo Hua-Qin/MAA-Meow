@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ReclamationConfigPanel(config: ReclamationConfig, onConfigChange: (ReclamationConfig) -> Unit) {
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
 
     Column(
@@ -69,15 +69,6 @@ fun ReclamationConfigPanel(config: ReclamationConfig, onConfigChange: (Reclamati
                 fontWeight = if (pagerState.currentPage == 1) FontWeight.Bold else FontWeight.Normal,
                 modifier = Modifier.clickable {
                     coroutineScope.launch { pagerState.animateScrollToPage(1) }
-                }
-            )
-            Text(
-                text = stringResource(R.string.common_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (pagerState.currentPage == 2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = if (pagerState.currentPage == 2) FontWeight.Bold else FontWeight.Normal,
-                modifier = Modifier.clickable {
-                    coroutineScope.launch { pagerState.animateScrollToPage(2) }
                 }
             )
         }
@@ -113,7 +104,7 @@ fun ReclamationConfigPanel(config: ReclamationConfig, onConfigChange: (Reclamati
                                     val updated = if (theme == "RelaunchAnchor") {
                                         config.copy(theme = theme, mode = 0, clearStore = false)
                                     } else {
-                                        config.copy(theme = theme)
+                                        config.copy(theme = theme, mode = 0)
                                     }
                                     onConfigChange(updated)
                                 }
@@ -130,6 +121,16 @@ fun ReclamationConfigPanel(config: ReclamationConfig, onConfigChange: (Reclamati
                             }
                         }
                         item {
+                            AnimatedVisibility(visible = isRelaunchAnchor) {
+                                ReclamationButtonGroup(
+                                    label = stringResource(R.string.panel_reclamation_relaunch_anchor_stage),
+                                    options = localizedRelaunchAnchorModeOptions(),
+                                    selectedValue = config.mode,
+                                    onValueChange = { onConfigChange(config.copy(mode = it as Int)) }
+                                )
+                            }
+                        }
+                        item {
                             AnimatedVisibility(visible = !isRelaunchAnchor && config.mode == 0) {
                                 CheckBoxWithLabel(
                                     checked = config.clearStore,
@@ -138,19 +139,133 @@ fun ReclamationConfigPanel(config: ReclamationConfig, onConfigChange: (Reclamati
                                 )
                             }
                         }
-                        item {
-                            AnimatedVisibility(visible = !isRelaunchAnchor && config.mode == 1) {
-                                Surface(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                                    shape = RoundedCornerShape(4.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_archive_tip),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
+                        // 说明区域(直接展示在选项下面,跟随 theme + mode 切换)
+                        when {
+                            isRelaunchAnchor -> {
+                                item {
+                                    val isRa15 = config.mode == 1
+                                    val containerColor = if (isRa15) {
+                                        MaterialTheme.colorScheme.errorContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.tertiaryContainer
+                                    }
+                                    val onContainerColor = if (isRa15) {
+                                        MaterialTheme.colorScheme.onErrorContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    }
+                                    val tipRes = if (isRa15) {
+                                        R.string.panel_reclamation_relaunch_anchor_tip_ra15
+                                    } else {
+                                        R.string.panel_reclamation_relaunch_anchor_tip_ra1
+                                    }
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = containerColor,
+                                        shape = RoundedCornerShape(4.dp)
+                                    ) {
+                                        Text(
+                                            stringResource(tipRes),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = onContainerColor,
+                                            modifier = Modifier.padding(8.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            config.mode == 0 -> {
+                                // Tales 无存档
+                                item {
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colorScheme.errorContainer,
+                                        shape = RoundedCornerShape(4.dp)
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_notice),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.padding(8.dp)
+                                        )
+                                    }
+                                }
+                                item {
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_no_save_title),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_no_save_line1),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_no_save_line2),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_no_save_line3),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_no_save_line4),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_no_save_line5),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                // Tales 有存档(mode == 1)
+                                item {
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                                        shape = RoundedCornerShape(4.dp)
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_archive_tip),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            modifier = Modifier.padding(8.dp)
+                                        )
+                                    }
+                                }
+                                item {
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_with_save_title),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_with_save_line1),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_with_save_line2),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            stringResource(R.string.panel_reclamation_with_save_line3),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -158,7 +273,7 @@ fun ReclamationConfigPanel(config: ReclamationConfig, onConfigChange: (Reclamati
 
                     // 高级设置 Tab
                     1 -> {
-                        val isArchiveMode = config.mode == 1
+                        val isArchiveMode = config.theme != "RelaunchAnchor" && config.mode == 1
                         item {
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(
@@ -214,99 +329,6 @@ fun ReclamationConfigPanel(config: ReclamationConfig, onConfigChange: (Reclamati
                         }
                     }
 
-                    // 说明 Tab
-                    2 -> {
-                        if (config.theme == "RelaunchAnchor") {
-                            item {
-                                Surface(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                                    shape = RoundedCornerShape(4.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_relaunch_anchor_tip),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                }
-                            }
-                        } else {
-                            item {
-                                Surface(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.errorContainer,
-                                    shape = RoundedCornerShape(4.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_notice),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onErrorContainer,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                }
-                            }
-                            item {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_no_save_title),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_no_save_line1),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_no_save_line2),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_no_save_line3),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_no_save_line4),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_no_save_line5),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            item {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_with_save_title),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_with_save_line1),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_with_save_line2),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        stringResource(R.string.panel_reclamation_with_save_line3),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -349,6 +371,17 @@ private fun localizedReclamationModeOptions(): List<Pair<Any, String>> {
         mode to when (mode) {
             0 -> stringResource(R.string.panel_reclamation_mode_no_save)
             1 -> stringResource(R.string.panel_reclamation_mode_with_save)
+            else -> mode.toString()
+        }
+    }
+}
+
+@Composable
+private fun localizedRelaunchAnchorModeOptions(): List<Pair<Any, String>> {
+    return ReclamationConfig.RELAUNCH_ANCHOR_MODE_VALUES.map { mode ->
+        mode to when (mode) {
+            0 -> stringResource(R.string.panel_reclamation_mode_ra1)
+            1 -> stringResource(R.string.panel_reclamation_mode_ra15)
             else -> mode.toString()
         }
     }
