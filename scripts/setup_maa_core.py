@@ -31,8 +31,8 @@ if sys.platform == "win32":
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 # ── Config ──────────────────────────────────────────────
-GITHUB_REPO = "MaaAssistantArknights/MaaAssistantArknights"
-API_BASE = f"https://api.github.com/repos/{GITHUB_REPO}"
+DEFAULT_GITHUB_REPO = "MaaAssistantArknights/MaaAssistantArknights"
+API_BASE = f"https://api.github.com/repos/{DEFAULT_GITHUB_REPO}"
 
 # ABI mapping: release asset keyword -> jniLibs subdirectory
 ABI_MAP = {
@@ -215,6 +215,8 @@ def extract_and_deploy(tarball: Path, abi: str, project_root: Path):
 
 def main():
     parser = argparse.ArgumentParser(description="Download and deploy prebuilt MAA Core artifacts")
+    parser.add_argument("--repo", "-r", default=DEFAULT_GITHUB_REPO,
+                        help=f"GitHub repository (owner/repo, default: {DEFAULT_GITHUB_REPO})")
     parser.add_argument("--tag", "-t", help="Specify release tag (default: latest)")
     parser.add_argument("--clean", "-c", action="store_true",
                         help="Deprecated: target dirs are always cleaned before deploy (kept for compatibility)")
@@ -222,6 +224,9 @@ def main():
     parser.add_argument("--abi", choices=["arm64-v8a", "x86_64", "all"], default="all",
                         help="Process only specified ABI (default: all)")
     args = parser.parse_args()
+
+    global API_BASE
+    API_BASE = f"https://api.github.com/repos/{args.repo}"
 
     project_root = get_project_root()
     cache_dir = project_root / CACHE_DIR

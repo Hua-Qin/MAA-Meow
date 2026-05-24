@@ -3,6 +3,10 @@ name: Build Release APK
 on:
   workflow_dispatch:
     inputs:
+      maa_repo:
+        description: 'MAA Core GitHub repo (owner/repo)'
+        required: false
+        default: 'MaaAssistantArknights/MaaAssistantArknights'
       maa_tag:
         description: 'MAA Core release tag'
         required: false
@@ -58,10 +62,14 @@ jobs:
           if [ -n "${{ github.event.inputs.maa_tag }}" ]; then
             TAG_ARG="--tag ${{ github.event.inputs.maa_tag }}"
           fi
+          REPO_ARG=""
+          if [ -n "${{ github.event.inputs.maa_repo }}" ]; then
+            REPO_ARG="--repo ${{ github.event.inputs.maa_repo }}"
+          fi
           if [ "${{ matrix.abi }}" = "all" ]; then
-            python scripts/setup_maa_core.py --clean $TAG_ARG
+            python scripts/setup_maa_core.py --clean $TAG_ARG $REPO_ARG
           else
-            python scripts/setup_maa_core.py --clean --abi ${{ matrix.abi }} $TAG_ARG
+            python scripts/setup_maa_core.py --clean --abi ${{ matrix.abi }} $TAG_ARG $REPO_ARG
           fi
 
       - name: Print MAA Resource version

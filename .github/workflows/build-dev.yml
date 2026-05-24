@@ -10,6 +10,10 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      maa_repo:
+        description: 'MAA Core GitHub repo (owner/repo)'
+        required: false
+        default: 'MaaAssistantArknights/MaaAssistantArknights'
       maa_tag:
         description: 'MAA Core release tag'
         required: false
@@ -54,7 +58,12 @@ jobs:
         run: |
           MAA_TAG="${{ github.event.inputs.maa_tag }}"
           MAA_TAG="${MAA_TAG:-v6.10.0-beta.1}"
-          python scripts/setup_maa_core.py --clean --tag "$MAA_TAG"
+          MAA_REPO="${{ github.event.inputs.maa_repo }}"
+          REPO_ARG=""
+          if [ -n "$MAA_REPO" ]; then
+            REPO_ARG="--repo $MAA_REPO"
+          fi
+          python scripts/setup_maa_core.py --clean --tag "$MAA_TAG" $REPO_ARG
 
       - name: Print MAA Resource version
         run: cat app/src/main/assets/MaaSync/MaaResource/version.json
