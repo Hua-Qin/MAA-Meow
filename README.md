@@ -1,7 +1,7 @@
 <div align="center">
 <img alt="LOGO" src="/docs/Logo.png" width="256" height="256" />
 
-# MAA Meow 🐱
+# MAA Meow 
 
 **在 Android 设备上原生运行 [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights)**
 
