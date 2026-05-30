@@ -100,6 +100,11 @@ data class FightConfig(
      */
     val dropsQuantity: Int = 5,
 
+    // TODO: 目标库存模式（WPF PR#16487 feat: 理智作战支持设定目标材料最大库存）
+    //   逻辑: 实际刷取次数 = dropsInventoryTarget - 当前仓库数
+    //   前提: 需要建立本地仓库数据持久化方案（ToolboxResultCollector.depotItems 当前为运行时 StateFlow，不持久）
+    //   待依赖: 本地仓库 base 设计完成后在此处新增 isInventoryTarget: Boolean 和 dropsInventoryTarget: Int
+
     // ============ 常规设置 - 代理倍率与关卡 ============
 
     /**
