@@ -25,11 +25,9 @@ abstract class VerifyI18nStringsTask : DefaultTask() {
     private val placeholderRe = Regex("""%\d+\$[-#+ 0-9.]*[a-zA-Z]""")
     // CJK 统一表意文字 + 常见中日韩标点/全角符号
     private val cjkRe = Regex("[\\u3400-\\u4DBF\\u4E00-\\u9FFF\\u3000-\\u303F\\uFF01-\\uFF60]")
-    // 英文文案里合法含中文的 key:语言自名、专有名词(Mirror酱)等,不计入“疑似漏翻”
+    // 英文文案里合法含中文的 key:语言自名
     private val cjkAllowed = setOf(
         "settings_language_zh",
-        "update_card_mirror_desc",
-        "update_cdk_label",
     )
 
     @TaskAction

@@ -283,11 +283,11 @@
     <string name="update_card_visit_site">Visit Website</string>
     <string name="update_card_github_desc">Download resources from the official GitHub repository. Suitable for users with a stable network connection; always serves the latest version.</string>
     <string name="update_card_mirror_brand">MirrorChyan</string>
-    <string name="update_card_mirror_desc">is an independent third-party acceleration service. It is a paid service, not charged by MAA.\n\nIts operating cost is covered by subscription revenue; part of the revenue supports project development. Subscribing to a CDK unlocks high-speed downloads and helps sustain development.\n\nA CDK is required when Mirror酱 is selected as the source.</string>
+    <string name="update_card_mirror_desc">is an independent third-party acceleration service. It is a paid service, not charged by MAA.\n\nIts operating cost is covered by subscription revenue; part of the revenue supports project development. Subscribing to a CDK unlocks high-speed downloads and helps sustain development.\n\nA CDK is required when Mirrorchyan is selected as the source.</string>
     <string name="update_card_about_source_cd">About %1$s</string>
 
     <!-- update cdk input -->
-    <string name="update_cdk_label">Mirror酱 CDK</string>
+    <string name="update_cdk_label">Mirrorchyan CDK</string>
     <string name="update_cdk_placeholder">Enter CDK</string>
     <string name="update_cdk_clear_cd">Clear</string>
     <string name="update_cdk_show_cd">Show</string>
