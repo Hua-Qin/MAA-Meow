@@ -80,12 +80,13 @@ fun FightConfigPanel(
     val isResourceCollectionOpen = resourceCollectionInfo?.isOpen == true
 
     val dropItemsList by itemHelper.dropItems.collectAsStateWithLifecycle()
-    val allStageItems = remember { activityManager.getMergedStageList(filterByToday = false) }
-    val stageTips = remember { activityManager.getStageTips() }
-    val todayName = remember { activityManager.getYjDayOfWeekName() }
+    val activityStages by activityManager.activityStages.collectAsStateWithLifecycle()
+    val allStageItems = remember(activityStages) { activityManager.getMergedStageList(filterByToday = false) }
+    val stageTips = remember(activityStages) { activityManager.getStageTips() }
+    val todayName = remember(activityStages) { activityManager.getYjDayOfWeekName() }
 
-    // 分组列表 -- 依赖 hideUnavailableStage
-    val stageGroups = remember(config.hideUnavailableStage) {
+    // 分组列表 -- 依赖 hideUnavailableStage 和活动关卡数据
+    val stageGroups = remember(activityStages, config.hideUnavailableStage) {
         activityManager.getMergedStageGroups(config.hideUnavailableStage)
     }
 
