@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,11 +47,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.aliothmoon.maameow.R
+import com.aliothmoon.maameow.data.achievement.AchievementEvents
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
+
 import com.aliothmoon.maameow.presentation.components.AdaptiveTaskPromptDialog
 import com.aliothmoon.maameow.presentation.components.TopAppBar
 import com.aliothmoon.maameow.presentation.viewmodel.ErrorLogViewModel
 import com.aliothmoon.maameow.theme.LogTypography
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -60,7 +63,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ErrorLogView(
     navController: NavController,
-    viewModel: ErrorLogViewModel = koinViewModel()
+    viewModel: ErrorLogViewModel = koinViewModel(),
+    achievementRepository: AchievementRepository = koinInject(),
 ) {
     val logFiles by viewModel.logFiles.collectAsStateWithLifecycle()
     val selectedContent by viewModel.selectedContent.collectAsStateWithLifecycle()
@@ -69,6 +73,12 @@ fun ErrorLogView(
     val exportIntent by viewModel.exportIntent.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
+
+    LaunchedEffect(achievementRepository) {
+        achievementRepository.report {
+            event = AchievementEvents.ERROR_LOG_OPENED
+        }
+    }
 
     // 处理导出 Intent
     val exportChooserTitle = stringResource(R.string.settings_log_export_chooser_title)

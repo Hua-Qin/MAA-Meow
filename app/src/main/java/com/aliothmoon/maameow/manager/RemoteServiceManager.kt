@@ -49,7 +49,6 @@ object RemoteServiceManager {
     )
 
     private var boundBackend: RemoteBackend? = null
-
     val state: StateFlow<ServiceState> = _state.asStateFlow()
 
     private val connectorCallbacks = object : RemoteServiceConnectorBackend.Callbacks {
@@ -97,7 +96,10 @@ object RemoteServiceManager {
         }
     }
 
-    fun initialize(context: Context, appSettings: AppSettingsManager) {
+    fun initialize(
+        context: Context,
+        appSettings: AppSettingsManager,
+    ) {
         ServiceBootLogger.init(context)
         RemoteAccessCoordinator.initialize(appSettings)
         RootRemoteServiceConnector.initialize(context)

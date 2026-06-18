@@ -7,6 +7,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.aliothmoon.maameow.R
 import com.aliothmoon.maameow.constant.DefaultDisplayConfig
+import com.aliothmoon.maameow.data.achievement.AchievementEvents
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
+
 import com.aliothmoon.maameow.data.model.update.UpdateChannel
 import com.aliothmoon.maameow.data.model.update.UpdateSource
 import com.aliothmoon.maameow.domain.models.AppSettings
@@ -27,7 +30,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 
 
-class AppSettingsManager(private val context: Context) {
+class AppSettingsManager(
+    private val context: Context,
+    private val achievementRepository: AchievementRepository,
+) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -306,7 +312,8 @@ class AppSettingsManager(private val context: Context) {
         .stateIn(
             scope, SharingStarted.Eagerly,
             runCatching {
-                val modeStr = if (initialSettings.themeMode == "LIGHT") "WHITE" else initialSettings.themeMode
+                val modeStr =
+                    if (initialSettings.themeMode == "LIGHT") "WHITE" else initialSettings.themeMode
                 ThemeMode.valueOf(modeStr)
             }.getOrDefault(ThemeMode.SYSTEM)
         )
@@ -384,6 +391,9 @@ class AppSettingsManager(private val context: Context) {
     suspend fun setLanguage(lang: AppLanguage) {
         with(AppSettingsSchema) {
             context.dataStore.edit { it[language] = lang.name }
+        }
+        achievementRepository.report {
+            event = AchievementEvents.LANGUAGE_CHANGED
         }
     }
 

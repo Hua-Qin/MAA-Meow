@@ -14,8 +14,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.aliothmoon.maameow.data.achievement.AchievementEvents
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
-import kotlinx.coroutines.flow.drop
 import com.aliothmoon.maameow.domain.service.MaaCompositionService
 import com.aliothmoon.maameow.domain.state.MaaExecutionState
 import com.aliothmoon.maameow.overlay.screensaver.HardwareScreenOffManager
@@ -25,6 +26,7 @@ import com.aliothmoon.maameow.presentation.viewmodel.BackgroundTaskViewModel
 import com.aliothmoon.maameow.schedule.model.ScheduledExecutionRequest
 import com.aliothmoon.maameow.theme.MaaMeowTheme
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private var isUiReady: Boolean = false
 
     private val appSettingsManager: AppSettingsManager by inject()
+    private val achievementRepository: AchievementRepository by inject()
     private val compositionService: MaaCompositionService by inject()
     private val screenSaverManager: ScreenSaverOverlayManager by inject()
     private val hardwareScreenOffManager: HardwareScreenOffManager by inject()
@@ -47,6 +50,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         dispatchScheduledLaunchIntent(intent)
         enableEdgeToEdge()
+        lifecycleScope.launch {
+            achievementRepository.report {
+                event = AchievementEvents.APP_LAUNCH
+            }
+        }
         doObserveKeepScreenOn()
         doObserveThemeMode()
         window.decorView.viewTreeObserver.addOnPreDrawListener(object :

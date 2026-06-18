@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +32,8 @@ import androidx.navigation.compose.rememberNavController
 import com.aliothmoon.maameow.R
 import com.aliothmoon.maameow.announcement.AnnouncementConfig
 import com.aliothmoon.maameow.constant.Routes
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
+import com.aliothmoon.maameow.data.achievement.achievementText
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.domain.models.RunMode
 import com.aliothmoon.maameow.domain.service.ExternalNotificationService
@@ -39,6 +43,8 @@ import com.aliothmoon.maameow.presentation.components.ResourceLoadingOverlay
 import com.aliothmoon.maameow.presentation.view.background.BackgroundTaskView
 import com.aliothmoon.maameow.presentation.view.home.HomeView
 import com.aliothmoon.maameow.presentation.view.notification.NotificationSettingsView
+import com.aliothmoon.maameow.presentation.view.settings.AchievementDebugView
+import com.aliothmoon.maameow.presentation.view.settings.AchievementView
 import com.aliothmoon.maameow.presentation.view.settings.ErrorLogView
 import com.aliothmoon.maameow.presentation.view.settings.LogHistoryView
 import com.aliothmoon.maameow.presentation.view.settings.SettingsView
@@ -56,6 +62,7 @@ import org.koin.compose.koinInject
 fun AppNavigation(
     backgroundTaskViewModel: BackgroundTaskViewModel,
     appSettings: AppSettingsManager = koinInject(),
+    achievementRepository: AchievementRepository = koinInject(),
     notificationService: ExternalNotificationService = koinInject(),
     overlayController: OverlayController = koinInject(),
 ) {
@@ -64,6 +71,7 @@ fun AppNavigation(
     val currentNavRoute = navBackStackEntry?.destination?.route
 
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var isFullscreen by remember { mutableStateOf(false) }
     var forceShowAnnouncement by remember { mutableStateOf(false) }
@@ -123,6 +131,18 @@ fun AppNavigation(
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
+    LaunchedEffect(achievementRepository) {
+        achievementRepository.unlockEvents.collect { id ->
+            val title = context.achievementText(id, "title")
+            snackbarHostState.showSnackbar(
+                message = context.getString(
+                    R.string.achievement_unlocked_message,
+                    title,
+                ),
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
 
     // 主 Tab 切换动画定义 - 使用极短的渐变色来平滑过渡，防止重叠感
     val tabEnterTransition = fadeIn(animationSpec = tween(150))
@@ -130,6 +150,7 @@ fun AppNavigation(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 if (showBottomBar) {
                     AppBottomNavigation(
@@ -232,6 +253,42 @@ fun AppNavigation(
                             navController = navController,
                             onViewAnnouncement = { forceShowAnnouncement = true },
                         )
+                    }
+
+                    composable(
+                        route = Routes.ACHIEVEMENT,
+                        enterTransition = {
+                            slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(350))
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(350))
+                        },
+                        popEnterTransition = {
+                            slideInHorizontally(initialOffsetX = { -it / 3 }, animationSpec = tween(350))
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(350))
+                        }
+                    ) {
+                        AchievementView(navController = navController)
+                    }
+
+                    composable(
+                        route = Routes.ACHIEVEMENT_DEBUG,
+                        enterTransition = {
+                            slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(350))
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(350))
+                        },
+                        popEnterTransition = {
+                            slideInHorizontally(initialOffsetX = { -it / 3 }, animationSpec = tween(350))
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(350))
+                        }
+                    ) {
+                        AchievementDebugView(navController = navController)
                     }
 
                     composable(

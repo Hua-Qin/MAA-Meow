@@ -1,16 +1,21 @@
 package com.aliothmoon.maameow.maa.callback
 
 import com.alibaba.fastjson2.JSONObject
+import com.aliothmoon.maameow.data.achievement.AchievementEvents
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
 import com.aliothmoon.maameow.data.model.toolbox.DepotItem
 import com.aliothmoon.maameow.data.model.toolbox.OperBoxOperator
 import com.aliothmoon.maameow.data.model.toolbox.OperBoxResult
 import com.aliothmoon.maameow.data.model.toolbox.RecruitCalcResult
 import com.aliothmoon.maameow.data.model.toolbox.RecruitOperator
 import com.aliothmoon.maameow.data.resource.ResourceDataManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import timber.log.Timber
+import kotlinx.coroutines.launch
 
 /**
  * 工具类任务的结构化结果收集器
@@ -18,7 +23,9 @@ import timber.log.Timber
  */
 class ToolboxResultCollector(
     private val resourceDataManager: ResourceDataManager,
+    private val achievementRepository: AchievementRepository,
 ) {
+    private val achievementScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // ==================== 公招识别 ====================
 
@@ -80,6 +87,13 @@ class ToolboxResultCollector(
             if (count > 0) DepotItem(id, count) else null
         }.sortedBy { it.id }
         _depotItems.value = items
+        achievementScope.launch {
+            achievementRepository.report {
+                event = AchievementEvents.TOOLBOX_RESULT
+                "tool" to "Depot"
+                "maxCount" to (items.maxOfOrNull { it.count } ?: 0)
+            }
+        }
     }
 
     fun clearDepot() {
@@ -137,6 +151,19 @@ class ToolboxResultCollector(
                 .thenByDescending { it.potential }),
             notOwned = notOwned.sortedByDescending { it.rarity },
         )
+        achievementScope.launch {
+            achievementRepository.report {
+                event = AchievementEvents.TOOLBOX_RESULT
+                "tool" to "OperBox"
+                "hasPallas" to ownOpers.any {
+                    it.name == "帕拉斯" || it.name.equals(
+                        "Pallas",
+                        ignoreCase = true
+                    )
+                }
+
+            }
+        }
     }
 
     fun clearOperBox() {

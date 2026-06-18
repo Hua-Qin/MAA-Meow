@@ -1,15 +1,17 @@
 package com.aliothmoon.maameow.presentation.viewmodel
 
 import android.content.Context
-import com.aliothmoon.maameow.R
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aliothmoon.maameow.R
+import com.aliothmoon.maameow.constant.Packages
+import com.aliothmoon.maameow.data.achievement.AchievementEvents
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
 import com.aliothmoon.maameow.data.model.CopilotConfig
 import com.aliothmoon.maameow.data.model.copilot.CopilotListItem
 import com.aliothmoon.maameow.data.model.copilot.CopilotTaskData
 import com.aliothmoon.maameow.data.model.copilot.DifficultyFlags
-import com.aliothmoon.maameow.constant.Packages
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.data.preferences.TaskChainState
 import com.aliothmoon.maameow.data.repository.CopilotRepository
@@ -21,12 +23,12 @@ import com.aliothmoon.maameow.domain.service.CopilotRequestException
 import com.aliothmoon.maameow.domain.service.MaaCompositionService
 import com.aliothmoon.maameow.domain.service.OperatorSummaryData
 import com.aliothmoon.maameow.domain.state.MaaExecutionState
-import com.aliothmoon.maameow.remote.AppAliveStatus
 import com.aliothmoon.maameow.maa.callback.CopilotRuntimeStateStore
 import com.aliothmoon.maameow.maa.task.MaaTaskType
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogConfirmAction
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogType
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogUiState
+import com.aliothmoon.maameow.remote.AppAliveStatus
 import com.aliothmoon.maameow.utils.i18n.UiText
 import com.aliothmoon.maameow.utils.i18n.resolve
 import com.aliothmoon.maameow.utils.i18n.uiTextDynamic
@@ -114,6 +116,7 @@ class CopilotViewModel(
     private val appAliveChecker: AppAliveChecker,
     private val chainState: TaskChainState,
     private val appSettings: AppSettingsManager,
+    private val achievementRepository: AchievementRepository,
 ) : ViewModel() {
 
     companion object {
@@ -1186,6 +1189,10 @@ class CopilotViewModel(
     }
 
     private suspend fun onCopilotTaskSuccess() {
+        achievementRepository.report {
+            event = AchievementEvents.COPILOT_SUCCESS
+        }
+
         val current = _state.value
         if (!current.useCopilotList) return
 
@@ -1229,6 +1236,9 @@ class CopilotViewModel(
                 val success = copilotManager.rateCopilot(id, isLike)
                 if (success) {
                     recentlyRatedCopilotIds.add(id)
+                    achievementRepository.report {
+                        event = AchievementEvents.COPILOT_LIKED
+                    }
                     if (updateStatusMessage) {
                         _state.update { it.copy(statusMessage = text(R.string.copilot_rate_success)) }
                     }

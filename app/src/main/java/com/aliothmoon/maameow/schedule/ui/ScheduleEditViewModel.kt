@@ -50,7 +50,6 @@ data class ScheduleEditUiState(
 )
 
 class ScheduleEditViewModel(
-    private val context: Context,
     private val repository: ScheduleStrategyRepository,
     private val taskChainState: TaskChainState,
     private val scheduleAlarmManager: ScheduleAlarmManager,
@@ -63,7 +62,7 @@ class ScheduleEditViewModel(
     private var existingStrategy: ScheduleStrategy? = null
 
     /** 加载已有策略（编辑模式），或初始化默认选择（新建模式） */
-    fun loadStrategy(id: String?) {
+    fun loadStrategy(context: Context, id: String?) {
         viewModelScope.launch {
             // 等待 Profile 数据加载完成
             taskChainState.isLoaded.filter { it }.first()
@@ -178,7 +177,7 @@ class ScheduleEditViewModel(
         }
     }
 
-    fun onSave() {
+    fun onSave(context: Context) {
         val current = _state.value
         if (current.name.isBlank()) {
             _state.update { it.copy(errorMessage = uiTextOf(R.string.schedule_error_name_required)) }
@@ -199,6 +198,7 @@ class ScheduleEditViewModel(
                     return
                 }
             }
+
             ScheduleType.INTERVAL -> {
                 if (current.startTimeMs == null) {
                     _state.update { it.copy(errorMessage = uiTextOf(R.string.schedule_error_start_time_required)) }

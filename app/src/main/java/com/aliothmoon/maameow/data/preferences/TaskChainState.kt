@@ -7,11 +7,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.aliothmoon.maameow.constant.Packages
+import com.aliothmoon.maameow.data.achievement.AchievementEvents
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
 import com.aliothmoon.maameow.data.model.InfrastConfig
 import com.aliothmoon.maameow.data.model.TaskChainNode
+import com.aliothmoon.maameow.data.model.TaskParamProvider
 import com.aliothmoon.maameow.data.model.TaskProfile
 import com.aliothmoon.maameow.data.model.TaskTypeInfo
-import com.aliothmoon.maameow.data.model.TaskParamProvider
 import com.aliothmoon.maameow.data.model.WakeUpConfig
 import com.aliothmoon.maameow.manager.RemoteServiceManager
 import com.aliothmoon.maameow.remote.PermissionGrantRequest
@@ -28,13 +30,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-
 import timber.log.Timber
 import java.util.UUID
 
 class TaskChainState(
     private val context: Context,
     private val appSettings: AppSettingsManager,
+    private val achievementRepository: AchievementRepository,
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -119,6 +121,9 @@ class TaskChainState(
             }
             Timber.d("Added node: %s (%s)", node.name, typeInfo.name)
         }
+        achievementRepository.report {
+            event = AchievementEvents.TASK_NODE_ADDED
+        }
         return newNodeId
     }
 
@@ -126,6 +131,9 @@ class TaskChainState(
         updateChain { current ->
             current.removeAll { it.id == nodeId }
             Timber.d("Removed node: %s", nodeId)
+        }
+        achievementRepository.report {
+            event = AchievementEvents.TASK_NODE_REMOVED
         }
     }
 

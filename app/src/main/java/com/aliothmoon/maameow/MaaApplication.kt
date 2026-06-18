@@ -35,7 +35,6 @@ class MaaApplication : Application() {
     private val treeHolder: LogTreeHolder by inject()
     private val scheduleRepository: ScheduleStrategyRepository by inject()
     private val scheduleAlarmManager: ScheduleAlarmManager by inject()
-
     override fun onCreate() {
         super.onCreate()
         val app = this

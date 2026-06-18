@@ -89,9 +89,10 @@ fun ScheduleEditView(
     val snackbarHostState = remember { SnackbarHostState() }
     var showTimePicker by remember { mutableStateOf(false) }
     var editingTime by remember { mutableStateOf<LocalTime?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(strategyId) {
-        viewModel.loadStrategy(strategyId)
+        viewModel.loadStrategy(context, strategyId)
     }
 
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -132,7 +133,7 @@ fun ScheduleEditView(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        TextButton(onClick = { viewModel.onSave() }) {
+                        TextButton(onClick = { viewModel.onSave(context) }) {
                             Text(stringResource(R.string.schedule_save))
                         }
                     }
@@ -336,7 +337,11 @@ fun ScheduleEditView(
                                     }) { Text(stringResource(R.string.schedule_next_step)) }
                                 },
                                 dismissButton = {
-                                    TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.common_cancel)) }
+                                    TextButton(onClick = { showDatePicker = false }) {
+                                        Text(
+                                            stringResource(R.string.common_cancel)
+                                        )
+                                    }
                                 }
                             ) {
                                 DatePicker(state = datePickerState)
@@ -345,7 +350,8 @@ fun ScheduleEditView(
 
                         if (showStartTimePicker) {
                             val existingTime = state.startTimeMs?.let { ms ->
-                                Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).toLocalTime()
+                                Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault())
+                                    .toLocalTime()
                             }
                             TimePickerDialog(
                                 initialTime = existingTime,
@@ -379,7 +385,11 @@ fun ScheduleEditView(
                         ) {
                             OutlinedTextField(
                                 value = if (state.intervalDays > 0) state.intervalDays.toString() else "",
-                                onValueChange = { viewModel.onIntervalDaysChanged(it.toIntOrNull() ?: 0) },
+                                onValueChange = {
+                                    viewModel.onIntervalDaysChanged(
+                                        it.toIntOrNull() ?: 0
+                                    )
+                                },
                                 label = { Text(stringResource(R.string.schedule_days_unit)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
@@ -387,16 +397,24 @@ fun ScheduleEditView(
                             )
                             OutlinedTextField(
                                 value = if (state.intervalHours > 0) state.intervalHours.toString() else "",
-                                onValueChange = { viewModel.onIntervalHoursChanged(it.toIntOrNull() ?: 0) },
+                                onValueChange = {
+                                    viewModel.onIntervalHoursChanged(
+                                        it.toIntOrNull() ?: 0
+                                    )
+                                },
                                 label = { Text(stringResource(R.string.schedule_hours_unit)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
                                 modifier = Modifier.width(80.dp)
                             )
-                            val totalMinutes = state.intervalDays * 24 * 60 + state.intervalHours * 60
+                            val totalMinutes =
+                                state.intervalDays * 24 * 60 + state.intervalHours * 60
                             if (totalMinutes > 0) {
                                 Text(
-                                    text = stringResource(R.string.schedule_total_hours, totalMinutes / 60),
+                                    text = stringResource(
+                                        R.string.schedule_total_hours,
+                                        totalMinutes / 60
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -466,7 +484,10 @@ fun ScheduleEditView(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(stringResource(R.string.schedule_force_start), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            stringResource(R.string.schedule_force_start),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                         ExpandableTipIcon(
                             modifier = Modifier.padding(start = 8.dp),
                             expanded = expanded,

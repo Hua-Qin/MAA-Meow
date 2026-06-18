@@ -34,7 +34,7 @@ import kotlin.coroutines.resume
 
 class PermissionManager(
     private val context: Context,
-    private val appSettings: AppSettingsManager
+    private val appSettings: AppSettingsManager,
 ) : DefaultLifecycleObserver {
 
     private val _state = MutableStateFlow(PermissionState())
@@ -73,30 +73,36 @@ class PermissionManager(
 
     fun refresh() {
         val remoteState = RemoteAccessCoordinator.refresh()
-        _state.value = PermissionState(
-            shizukuAvailable = remoteState.shizukuAvailable,
-            shizuku = remoteState.shizukuGranted,
-            root = remoteState.rootGranted,
-            rootAvailable = remoteState.rootAvailable,
-            startupBackend = remoteState.configuredBackend,
-            overlay = checkOverlay(),
-            storage = checkStorage(),
-            accessibility = checkAccessibility(),
-            batteryWhitelist = checkBatteryWhitelist(),
-            notification = checkNotification()
+        updateState(
+            PermissionState(
+                shizukuAvailable = remoteState.shizukuAvailable,
+                shizuku = remoteState.shizukuGranted,
+                root = remoteState.rootGranted,
+                rootAvailable = remoteState.rootAvailable,
+                startupBackend = remoteState.configuredBackend,
+                overlay = checkOverlay(),
+                storage = checkStorage(),
+                accessibility = checkAccessibility(),
+                batteryWhitelist = checkBatteryWhitelist(),
+                notification = checkNotification(),
+            )
         )
     }
 
     private fun applyRemoteAccessState(remoteState: RemoteAccessState) {
-        _state.update { current ->
-            current.copy(
+        updateState(
+            _state.value.copy(
                 shizukuAvailable = remoteState.shizukuAvailable,
                 shizuku = remoteState.shizukuGranted,
                 root = remoteState.rootGranted,
                 rootAvailable = remoteState.rootAvailable,
                 startupBackend = remoteState.configuredBackend
             )
-        }
+        )
+    }
+
+    private fun updateState(state: PermissionState) {
+        _state.value = state
     }
 
     private fun checkOverlay(): Boolean {

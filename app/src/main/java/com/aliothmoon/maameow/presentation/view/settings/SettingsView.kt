@@ -55,6 +55,7 @@ import com.aliothmoon.maameow.constant.Routes
 import com.aliothmoon.maameow.data.model.update.UpdateChannel
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.domain.models.RemoteBackend
+import com.aliothmoon.maameow.domain.service.AchievementReporter
 import com.aliothmoon.maameow.domain.service.LogExportService
 import com.aliothmoon.maameow.domain.service.ResourceInitService
 import com.aliothmoon.maameow.domain.state.ResourceInitState
@@ -78,7 +79,8 @@ fun SettingsView(
     onViewAnnouncement: () -> Unit = {},
     viewModel: SettingsViewModel = koinViewModel(),
     resourceInitService: ResourceInitService = koinInject(),
-    logExportService: LogExportService = koinInject()
+    logExportService: LogExportService = koinInject(),
+    achievementReporter: AchievementReporter = koinInject(),
 ) {
     val resourceInitState by resourceInitService.state.collectAsStateWithLifecycle()
     val debugMode by viewModel.debugMode.collectAsStateWithLifecycle()
@@ -307,6 +309,24 @@ fun SettingsView(
                         onBackendSelected = { viewModel.setStartupBackend(it) }
                     )
                     SettingsDivider(contentColor)
+                    SettingClickItem(
+                        title = stringResource(R.string.settings_achievement_title),
+                        description = stringResource(R.string.settings_achievement_desc),
+                        contentColor = contentColor
+                    ) {
+                        navController.navigate(Routes.ACHIEVEMENT)
+                    }
+                    if (BuildConfig.DEBUG) {
+                        SettingsDivider(contentColor)
+                        SettingClickItem(
+                            title = stringResource(R.string.settings_achievement_debug_title),
+                            description = stringResource(R.string.settings_achievement_debug_desc),
+                            contentColor = contentColor
+                        ) {
+                            navController.navigate(Routes.ACHIEVEMENT_DEBUG)
+                        }
+                    }
+                    SettingsDivider(contentColor)
                     SettingThemeModeItem(
                         contentColor = contentColor,
                         selectedMode = themeMode,
@@ -425,7 +445,7 @@ fun SettingsView(
                     SettingInfoRow(
                         label = stringResource(R.string.settings_about_version),
                         value = BuildConfig.VERSION_NAME,
-                        contentColor = contentColor
+                        contentColor = contentColor,
                     )
                     SettingsDivider(contentColor)
                     SettingInfoRow(
@@ -439,6 +459,7 @@ fun SettingsView(
                         description = stringResource(R.string.settings_about_qq_group_desc),
                         contentColor = contentColor
                     ) {
+                        achievementReporter.reportFeedbackGroupOpened()
                         Misc.openUriSafely(context, "https://qm.qq.com/q/j4CFbeDQXu")
                     }
                     SettingsDivider(contentColor)
@@ -603,11 +624,13 @@ private fun SettingSwitchItem(
 private fun SettingInfoRow(
     label: String,
     value: String,
-    contentColor: Color
+    contentColor: Color,
+    onClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(vertical = MaaDesignTokens.Spacing.listItemVertical),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

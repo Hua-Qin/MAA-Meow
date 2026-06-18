@@ -3,6 +3,9 @@ package com.aliothmoon.maameow.domain.service
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
+import com.aliothmoon.maameow.data.achievement.AchievementEvents
+import com.aliothmoon.maameow.data.achievement.AchievementRepository
+
 import com.aliothmoon.maameow.data.config.MaaPathConfig
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +23,8 @@ import java.util.zip.ZipOutputStream
 class LogExportService(
     private val context: Context,
     private val pathConfig: MaaPathConfig,
-    private val appSettingsManager: AppSettingsManager
+    private val appSettingsManager: AppSettingsManager,
+    private val achievementRepository: AchievementRepository,
 ) {
     companion object {
         private const val EXPORT_DIR = "export"
@@ -62,6 +66,9 @@ class LogExportService(
             createZipFile(zipFile, logFiles, dir)
 
             Timber.i("Exported ${logFiles.size} log files to ${zipFile.absolutePath}")
+            achievementRepository.report {
+                event = AchievementEvents.LOG_EXPORTED
+            }
 
             createShareIntent(zipFile)
         } catch (e: Exception) {

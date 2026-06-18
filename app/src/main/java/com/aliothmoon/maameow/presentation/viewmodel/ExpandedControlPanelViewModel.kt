@@ -5,12 +5,12 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aliothmoon.maameow.data.model.LogItem
+import com.aliothmoon.maameow.data.model.TaskParamProvider
 import com.aliothmoon.maameow.data.model.TaskTypeInfo
 import com.aliothmoon.maameow.data.preferences.TaskChainState
 import com.aliothmoon.maameow.domain.service.MaaCompositionService
 import com.aliothmoon.maameow.domain.service.MaaSessionLogger
-import com.aliothmoon.maameow.domain.state.MaaExecutionState
-import com.aliothmoon.maameow.data.model.TaskParamProvider
+import com.aliothmoon.maameow.domain.service.AchievementReporter
 import com.aliothmoon.maameow.domain.usecase.PrepareTaskStartUseCase
 import com.aliothmoon.maameow.domain.usecase.TaskStartAcknowledgement
 import com.aliothmoon.maameow.domain.usecase.TaskStartContext
@@ -19,7 +19,6 @@ import com.aliothmoon.maameow.domain.usecase.TaskStartMode
 import com.aliothmoon.maameow.overlay.OverlayController
 import com.aliothmoon.maameow.presentation.view.panel.FloatingPanelState
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogConfirmAction
-import com.aliothmoon.maameow.presentation.view.panel.PanelDialogType
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogUiState
 import com.aliothmoon.maameow.presentation.view.panel.PanelTab
 import com.aliothmoon.maameow.utils.i18n.resolve
@@ -39,7 +38,8 @@ class ExpandedControlPanelViewModel(
     private val prepareTaskStart: PrepareTaskStartUseCase,
     private val compositionService: MaaCompositionService,
     private val overlayController: OverlayController,
-    private val sessionLogger: MaaSessionLogger
+    private val sessionLogger: MaaSessionLogger,
+    private val achievementReporter: AchievementReporter,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FloatingPanelState())
@@ -281,6 +281,11 @@ class ExpandedControlPanelViewModel(
             )
             val message = application.formatStartResult(result)
             if (result is MaaCompositionService.StartResult.Success) {
+                achievementReporter.reportTaskStarted(
+                    taskCount = plan.params.size,
+                    launchesGame = plan.launchesGame,
+                    gameAliveBeforeStart = plan.gameAliveBeforeStart,
+                )
                 // 成功时用 Toast 简短提示
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
