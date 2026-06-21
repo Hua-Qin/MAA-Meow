@@ -228,6 +228,10 @@ class TaskChainHandler(
         val message = sb.toString()
         sessionLogger.append(message, LogLevel.SUCCESS)
         notificationCenter.notifyAllTasksCompleted(message)
+
+        callbackScope.launch {
+            taskChainState.resetRecruitConfigUseExpedited()
+        }
     }
 
     /**

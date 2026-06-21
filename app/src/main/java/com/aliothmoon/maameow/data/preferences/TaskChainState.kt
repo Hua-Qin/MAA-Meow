@@ -10,6 +10,7 @@ import com.aliothmoon.maameow.constant.Packages
 import com.aliothmoon.maameow.data.achievement.AchievementEvents
 import com.aliothmoon.maameow.data.achievement.AchievementRepository
 import com.aliothmoon.maameow.data.model.InfrastConfig
+import com.aliothmoon.maameow.data.model.RecruitConfig
 import com.aliothmoon.maameow.data.model.TaskChainNode
 import com.aliothmoon.maameow.data.model.TaskParamProvider
 import com.aliothmoon.maameow.data.model.TaskProfile
@@ -207,6 +208,27 @@ class TaskChainState(
                 current[idx] = current[idx].copy(config = config)
             } else {
                 Timber.w("updateNodeConfig: node %s not found", nodeId)
+            }
+        }
+    }
+
+
+    suspend fun resetRecruitConfigUseExpedited() {
+        updateChain { current ->
+            for (i in current.indices) {
+                val node = current[i]
+                if (!node.enabled) continue
+                when (val cfg = node.config) {
+                    is RecruitConfig -> if (cfg.useExpedited) {
+                        current[i] = node.copy(config = cfg.copy(useExpedited = false))
+                        Timber.d(
+                            "resetTemporaryVariables: cleared useExpedited on node %s",
+                            node.id
+                        )
+                    }
+
+                    else -> {}
+                }
             }
         }
     }
