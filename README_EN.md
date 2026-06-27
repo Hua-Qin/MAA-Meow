@@ -1,5 +1,5 @@
 <div align="center">
-<img alt="LOGO" src="/docs/Logo.png" width="256" height="256" />
+<img alt="LOGO" src="/docs/en-us/develop/Logo.png" width="256" height="256" />
 
 # MAA Meow 🐱
 
@@ -23,10 +23,10 @@ One-click automation for all daily tasks, powered by image recognition
 > No root required. Run Arknights in the background! Still in development — expect instability. Feedback is welcome!
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="200" />
-  <img src="docs/screenshots/background_task.png" width="200" />
-  <img src="docs/screenshots/schedule.png" width="200" />
-  <img src="docs/screenshots/auto_controls.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/home.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/background_task.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/schedule.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/auto_controls.png" width="200" />
 </p>
 
 ## Features

@@ -1,5 +1,5 @@
 <div align="center">
-<img alt="LOGO" src="/docs/Logo.png" width="256" height="256" />
+<img alt="LOGO" src="/docs/zh-cn/develop/Logo.png" width="256" height="256" />
 
 # MAA Meow 
 
@@ -23,10 +23,10 @@
 > 无需 Root 权限，明日方舟可后台！正在开发中，功能不稳定，欢迎尝鲜体验～
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="200" />
-  <img src="docs/screenshots/background_task.png" width="200" />
-  <img src="docs/screenshots/schedule.png" width="200" />
-  <img src="docs/screenshots/auto_controls.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/home.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/background_task.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/schedule.png" width="200" />
+  <img src="docs/zh-cn/manual/screenshots/auto_controls.png" width="200" />
 </p>
 
 ## 特性
