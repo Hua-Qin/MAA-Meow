@@ -52,6 +52,7 @@ import com.aliothmoon.maameow.maa.callback.TaskChainHandler
 import com.aliothmoon.maameow.maa.callback.TaskChainStatusTracker
 import com.aliothmoon.maameow.maa.callback.ToolboxResultCollector
 import com.aliothmoon.maameow.manager.PermissionManager
+import com.aliothmoon.maameow.manager.ShizukuReadinessProvider
 import com.aliothmoon.maameow.overlay.OverlayController
 import com.aliothmoon.maameow.overlay.OverlayViewModelOwner
 import com.aliothmoon.maameow.overlay.border.BorderOverlayManager
@@ -94,6 +95,7 @@ val appModule = module {
     singleOf(::ETagCacheManager)
     singleOf(::MaaApiService)
     singleOf(::PermissionManager)
+    singleOf(::ShizukuReadinessProvider)
 
 
     singleOf(::AppSettingsManager)

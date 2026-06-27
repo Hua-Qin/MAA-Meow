@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import rikka.shizuku.Shizuku
+import rikka.sui.Sui
 import timber.log.Timber
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
@@ -18,6 +19,21 @@ object ShizukuManager : RemoteAccessPermissionBackend {
 
     private val listeners = CopyOnWriteArraySet<RemoteAccessStateListener>()
     private val observingState = AtomicBoolean(false)
+    private val suiInitialized = AtomicBoolean(false)
+
+    @Volatile
+    var isSui: Boolean = false
+        private set
+
+    fun initSui(packageName: String) {
+        if (!suiInitialized.compareAndSet(false, true)) return
+        isSui = try {
+            Sui.init(packageName)
+        } catch (e: Exception) {
+            Timber.e(e, "Sui.init failed")
+            false
+        }
+    }
 
     fun isShizukuAvailable(): Boolean = isAvailable()
 

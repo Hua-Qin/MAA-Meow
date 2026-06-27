@@ -81,15 +81,12 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aliothmoon.maameow.R
 import com.aliothmoon.maameow.constant.DefaultDisplayConfig
-import com.aliothmoon.maameow.domain.models.RemoteBackend
 import com.aliothmoon.maameow.domain.service.MaaCompositionService
 import com.aliothmoon.maameow.domain.service.UnifiedStateDispatcher
 import com.aliothmoon.maameow.domain.models.RunMode
 import com.aliothmoon.maameow.domain.state.MaaExecutionState
-import com.aliothmoon.maameow.manager.PermissionManager
-import com.aliothmoon.maameow.manager.ShizukuInstallHelper
 import com.aliothmoon.maameow.presentation.components.AdaptiveTaskPromptDialog
-import com.aliothmoon.maameow.presentation.components.ShizukuPermissionDialog
+import com.aliothmoon.maameow.presentation.components.ShizukuReadinessGate
 import com.aliothmoon.maameow.presentation.view.panel.PanelHeader
 import com.aliothmoon.maameow.presentation.view.panel.LogPanel
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogType
@@ -98,10 +95,10 @@ import com.aliothmoon.maameow.presentation.view.panel.TaskConfigPanel
 import com.aliothmoon.maameow.presentation.view.panel.TaskListPanel
 import com.aliothmoon.maameow.presentation.view.panel.AutoBattlePanel
 import com.aliothmoon.maameow.presentation.viewmodel.BackgroundTaskViewModel
-import com.aliothmoon.maameow.utils.i18n.remoteBackendPermissionLabel
 import com.aliothmoon.maameow.presentation.viewmodel.CopilotViewModel
 import com.aliothmoon.maameow.presentation.viewmodel.ToolboxViewModel
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
+import com.aliothmoon.maameow.manager.PermissionManager
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -137,21 +134,19 @@ fun BackgroundTaskView(
     toolboxViewModel: ToolboxViewModel = koinInject(),
     compositionService: MaaCompositionService = koinInject(),
     dispatcher: UnifiedStateDispatcher = koinInject(),
-    permissionManager: PermissionManager = koinInject(),
     screenSaverManager: ScreenSaverOverlayManager = koinInject(),
     appWatchdog: AppWatchdog = koinInject(),
     appSettingsManager: AppSettingsManager = koinInject(),
+    permissionManager: PermissionManager = koinInject(),
 ) {
 
     val coroutineScope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val maaState by compositionService.state.collectAsStateWithLifecycle()
     val runMode by appSettingsManager.runMode.collectAsStateWithLifecycle()
+    val permissionState by permissionManager.state.collectAsStateWithLifecycle()
     val markers by viewModel.markers.collectAsStateWithLifecycle()
     val displayResolution by compositionService.displayResolution.collectAsStateWithLifecycle()
-    val permissions by permissionManager.state.collectAsStateWithLifecycle()
-    val shizukuShortcutEnabled by appSettingsManager.shizukuShortcutEnabled.collectAsStateWithLifecycle()
-    val shizukuLaunchPackage by appSettingsManager.shizukuLaunchPackage.collectAsStateWithLifecycle()
     val isChainLoaded by viewModel.chainState.isLoaded.collectAsStateWithLifecycle()
     var hasInitialized by rememberSaveable { mutableStateOf(false) }
     if (isChainLoaded) {
@@ -194,88 +189,8 @@ fun BackgroundTaskView(
     val context = LocalContext.current
     val serviceDiedMessage = stringResource(R.string.bg_toast_service_died)
     val appDiedMessage = stringResource(R.string.bg_toast_app_died)
-    val permissionNotAcquiredFormat = stringResource(R.string.bg_toast_permission_not_acquired)
-    val currentStartupBackend by rememberUpdatedState(permissions.startupBackend)
-    val currentPermissionLabel by rememberUpdatedState(
-        context.remoteBackendPermissionLabel(
-            currentStartupBackend
-        )
-    )
 
-    var showRemoteAccessDialog by remember { mutableStateOf(true) }
-
-    LaunchedEffect(permissions.remoteAccessGranted, permissions.startupBackend) {
-        showRemoteAccessDialog = !permissions.remoteAccessGranted
-    }
-
-    if (!permissions.remoteAccessGranted && showRemoteAccessDialog) {
-        var isRequestingRemoteAccess by remember { mutableStateOf(false) }
-        val canOpenShizukuShortcut =
-            permissions.startupBackend == RemoteBackend.SHIZUKU && !permissions.isStartupBackendAvailable(
-                permissions.startupBackend
-            ) && shizukuShortcutEnabled
-        ShizukuPermissionDialog(
-            title = stringResource(
-            R.string.bg_shizuku_permission_title, permissions.startupBackend.display
-        ),
-            message = if (canOpenShizukuShortcut) {
-                stringResource(
-                    R.string.bg_shizuku_permission_message, permissions.startupBackend.display
-                )
-            } else {
-                stringResource(
-                    R.string.bg_remote_access_unavailable_message,
-                    permissions.startupBackend.display
-                )
-            },
-            isRequesting = isRequestingRemoteAccess,
-            onConfirm = {
-                if (isRequestingRemoteAccess) return@ShizukuPermissionDialog
-                if (canOpenShizukuShortcut) {
-                    val opened = ShizukuInstallHelper.openShizuku(context, shizukuLaunchPackage)
-                    if (!opened) {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.home_toast_open_shizuku_failed),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return@ShizukuPermissionDialog
-                }
-                coroutineScope.launch {
-                    isRequestingRemoteAccess = true
-                    val granted = permissionManager.requestRemoteAccess()
-                    isRequestingRemoteAccess = false
-                    if (!granted) {
-                        val message =
-                            if (!permissions.isStartupBackendAvailable(permissions.startupBackend)) {
-                                context.getString(
-                                    R.string.bg_toast_remote_access_unavailable,
-                                    permissions.startupBackend.display
-                                )
-                            } else {
-                                permissionNotAcquiredFormat.format(currentPermissionLabel)
-                            }
-                        Toast.makeText(
-                            context, message, Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            },
-            onDismiss = { showRemoteAccessDialog = false },
-            confirmText = if (canOpenShizukuShortcut) {
-                stringResource(R.string.dialog_shizuku_open_app)
-            } else {
-                null
-            },
-            dismissText = if (canOpenShizukuShortcut) {
-                stringResource(R.string.common_cancel)
-            } else {
-                ""
-            },
-            dismissOnOutsideClick = canOpenShizukuShortcut
-        )
-    }
+    ShizukuReadinessGate()
 
 
     val pendingExecution by viewModel.coordinator.pendingExecution.collectAsStateWithLifecycle()
@@ -531,10 +446,19 @@ fun BackgroundTaskView(
                         if (canShowTaskActions) {
                             Spacer(modifier = Modifier.height(6.dp))
                             val focusManager = LocalFocusManager.current
-                            // 前台模式不从后台任务页启动任务：按钮显示为禁用态但仍可点击，点击给出提示（防呆
+                            // 启动按钮的两种「禁用态」：① 前台模式不从后台任务页启动；
+                            // ② 远程后端（Shizuku/Root）不可用。两者均显示为禁用态但仍可点击，
+                            // 点击给出对应提示（防呆），与领域层 checkPreconditions 守卫一致。
                             val foregroundBlocked = runMode == RunMode.FOREGROUND
+                            val backendBlocked =
+                                !permissionState.isStartupBackendAvailable(permissionState.startupBackend)
+                            val startBlocked = foregroundBlocked || backendBlocked
                             val switchBackgroundModeMessage =
                                 stringResource(R.string.navigation_toast_switch_background_mode)
+                            val backendUnavailableMessage = stringResource(
+                                R.string.home_toast_backend_unavailable,
+                                permissionState.startupBackend.display
+                            )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -551,8 +475,12 @@ fun BackgroundTaskView(
                                             ).show()
                                             return@Button
                                         }
-                                        if (!permissions.remoteAccessGranted) {
-                                            showRemoteAccessDialog = true
+                                        if (backendBlocked) {
+                                            Toast.makeText(
+                                                context,
+                                                backendUnavailableMessage,
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                             return@Button
                                         }
                                         when (state.current) {
@@ -563,7 +491,7 @@ fun BackgroundTaskView(
                                         }
                                     },
                                     enabled = maaState != MaaExecutionState.RUNNING && maaState != MaaExecutionState.STARTING && maaState != MaaExecutionState.STOPPING,
-                                    colors = if (foregroundBlocked) {
+                                    colors = if (startBlocked) {
                                         ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.onSurface.copy(
                                                 alpha = 0.12f

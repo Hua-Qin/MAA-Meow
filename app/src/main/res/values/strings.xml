@@ -529,12 +529,7 @@
     <!-- panel: mall -->
     <string name="panel_mall_use_formation">使用编队</string>
 
-    <!-- background task: permission & toast -->
-    <string name="bg_shizuku_permission_title">需要%1$s权限</string>
-    <string name="bg_shizuku_permission_message">后台任务页面依赖%1$s服务，授权成功前将持续显示该提示。</string>
-    <string name="bg_remote_access_unavailable_message">%1$s 不可用，请检查对应服务是否启动。\n\n在对应服务启动并完成授权前，此弹窗会持续显示。</string>
-    <string name="bg_toast_remote_access_unavailable">%1$s不可用，请检查对应服务是否启动。</string>
-    <string name="bg_toast_permission_not_acquired">%1$s未获取，请重试</string>
+    <!-- background task: toast -->
     <string name="bg_toast_service_died">MaaService 异常关闭，请尝试重新启动</string>
     <string name="bg_toast_app_died">游戏进程未启动或被异常关闭</string>
 
@@ -627,6 +622,8 @@
     <string name="dialog_shizuku_open_app">打开 Shizuku</string>
     <string name="dialog_sui_detected_title">检测到 Sui</string>
     <string name="dialog_sui_detected_message">当前使用 Sui 提供 Shizuku 服务，Sui 以 Root 权限运行，MaaMeow 可能无法正常工作，请以实际测试为主</string>
+    <string name="dialog_shizuku_need_auth_title">Shizuku 未授权</string>
+    <string name="dialog_shizuku_need_auth_message">检测到 Shizuku 服务正在运行但尚未授权 MaaMeow，请完成授权。授权成功前将持续显示该提示。</string>
 
     <!-- settings: about section -->
     <string name="settings_section_about">关于</string>
@@ -1315,6 +1312,7 @@
     <string name="task_start_error_game_not_on_background_display">后台模式下游戏应由开始唤醒任务启动，请清理游戏后台并勾选开始唤醒任务</string>
     <string name="task_start_error_resource_load_failed">资源加载失败，请尝试重新初始化资源</string>
     <string name="task_start_error_service_connecting">服务正在启动中，请稍后再试</string>
+    <string name="task_start_error_backend_unavailable">%1$s不可用，请先启动对应服务并完成授权后再启动任务</string>
     <string name="task_start_error_maa_create_instance">MaaCore 初始化失败，请重启应用</string>
     <string name="task_start_error_set_touch_mode">触控模式设置失败，请重启应用</string>
     <string name="task_start_error_portrait_orientation">当前屏幕为竖屏，请切换为横屏后启动</string>

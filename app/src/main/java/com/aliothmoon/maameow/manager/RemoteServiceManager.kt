@@ -101,6 +101,7 @@ object RemoteServiceManager {
         appSettings: AppSettingsManager,
     ) {
         ServiceBootLogger.init(context)
+        ShizukuManager.initSui(context.packageName)
         RemoteAccessCoordinator.initialize(appSettings)
         RootRemoteServiceConnector.initialize(context)
         LogcatServiceManager.initialize(context)

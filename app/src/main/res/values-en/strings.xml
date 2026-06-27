@@ -325,12 +325,7 @@
     <!-- panel: mall -->
     <string name="panel_mall_use_formation">Use Formation</string>
 
-    <!-- background task: permission & toast -->
-    <string name="bg_shizuku_permission_title">%1$s Permission Required</string>
-    <string name="bg_shizuku_permission_message">The background task page depends on the %1$s service. This prompt will keep showing until access is granted.</string>
-    <string name="bg_remote_access_unavailable_message">%1$s is unavailable. Please check whether the corresponding service is running.\n\nThis dialog will keep showing until the corresponding service starts and access is granted.</string>
-    <string name="bg_toast_remote_access_unavailable">%1$s is unavailable. Please check whether the corresponding service is running.</string>
-    <string name="bg_toast_permission_not_acquired">%1$s not acquired, please try again</string>
+    <!-- background task: toast -->
     <string name="bg_toast_service_died">MaaService terminated unexpectedly. Please try restarting</string>
     <string name="bg_toast_app_died">Game process is not running or was killed unexpectedly</string>
 
@@ -423,6 +418,8 @@
     <string name="dialog_shizuku_open_app">Open Shizuku</string>
     <string name="dialog_sui_detected_title">Sui Detected</string>
     <string name="dialog_sui_detected_message">Sui is providing the Shizuku service with root privileges. MaaMeow may not work correctly; please verify by actual testing.</string>
+    <string name="dialog_shizuku_need_auth_title">Shizuku Not Authorized</string>
+    <string name="dialog_shizuku_need_auth_message">Shizuku is running but has not authorized MaaMeow yet. Please grant access. This prompt will keep showing until access is granted.</string>
 
     <string name="settings_section_about">About</string>
     <string name="settings_about_version">Version</string>
@@ -1259,6 +1256,7 @@
     <string name="task_start_error_game_not_on_background_display">In background mode, the game must be launched by the Wake Up task. Please close the game and enable \"Start Game\" in Wake Up</string>
     <string name="task_start_error_resource_load_failed">Resource loading failed. Try reinitializing resources</string>
     <string name="task_start_error_service_connecting">Service is starting up, please try again in a moment</string>
+    <string name="task_start_error_backend_unavailable">%1$s is unavailable. Start the service and grant permission before starting tasks</string>
     <string name="task_start_error_maa_create_instance">MaaCore initialization failed. Restart the app</string>
     <string name="task_start_error_set_touch_mode">Failed to set touch mode. Restart the app</string>
     <string name="task_start_error_portrait_orientation">The screen is in portrait mode. Switch to landscape before starting</string>

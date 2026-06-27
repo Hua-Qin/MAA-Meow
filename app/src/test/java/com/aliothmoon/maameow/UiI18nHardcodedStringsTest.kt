@@ -82,7 +82,7 @@ class UiI18nHardcodedStringsTest {
             TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/ResourceInitDialog.kt"),
             TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/UpdateConfirmDialog.kt"),
             TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/TopAppBar.kt"),
-            TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/ShizukuPermissionDialog.kt"),
+            TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/ShizukuReadinessDialog.kt"),
             TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/tip/ExpandableTipIcon.kt"),
             TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/AdaptiveTaskPromptDialog.kt"),
             TargetFile("src/main/java/com/aliothmoon/maameow/presentation/components/OverlayDialog.kt"),

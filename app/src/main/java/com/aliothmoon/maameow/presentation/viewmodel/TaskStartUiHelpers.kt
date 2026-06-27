@@ -130,6 +130,10 @@ internal fun Context.resolveTaskStartFailureMessage(result: MaaCompositionServic
         is MaaCompositionService.StartResult.ServiceConnecting -> {
             uiTextOf(R.string.task_start_error_service_connecting)
         }
+
+        is MaaCompositionService.StartResult.RemoteAccessUnavailable -> {
+            uiTextOf(R.string.task_start_error_backend_unavailable, result.backend.display)
+        }
     }
 }
 

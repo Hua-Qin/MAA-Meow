@@ -12,6 +12,7 @@ import com.aliothmoon.maameow.data.model.LogLevel
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.data.preferences.TaskChainState
 import com.aliothmoon.maameow.data.resource.ActivityManager
+import com.aliothmoon.maameow.domain.models.RemoteBackend
 import com.aliothmoon.maameow.domain.models.RunMode
 import com.aliothmoon.maameow.domain.state.MaaExecutionState
 import com.aliothmoon.maameow.maa.AsstMsg
@@ -23,9 +24,11 @@ import com.aliothmoon.maameow.maa.callback.MaaExecutionStateHolder
 import com.aliothmoon.maameow.maa.callback.SubTaskHandler
 import com.aliothmoon.maameow.maa.callback.TaskChainStatusTracker
 import com.aliothmoon.maameow.maa.task.MaaTaskParams
+import com.aliothmoon.maameow.manager.RemoteAccessCoordinator
 import com.aliothmoon.maameow.manager.RemoteServiceManager
 import com.aliothmoon.maameow.manager.RemoteServiceManager.useRemoteService
 import com.aliothmoon.maameow.utils.Misc
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -131,6 +134,9 @@ class MaaCompositionService(
 
         /** 远程服务正在连接中，任务无法立即启动 */
         data object ServiceConnecting : StartResult()
+
+        /** 远程后端（Shizuku/Root）不可用或无法获取，任务拒绝启动 */
+        data class RemoteAccessUnavailable(val backend: RemoteBackend) : StartResult()
     }
 
     sealed class StopResult {
@@ -239,6 +245,16 @@ class MaaCompositionService(
                 "服务正在启动中，请稍后再试",
                 "SERVICE_CONNECTING",
                 StartResult.ServiceConnecting
+            )
+        }
+
+        val access = RemoteAccessCoordinator.refresh()
+        val backend = access.configuredBackend
+        if (!access.isAvailable(backend)) {
+            return rejectStart(
+                "${backend.display} 不可用，已取消启动",
+                "BACKEND_UNAVAILABLE",
+                StartResult.RemoteAccessUnavailable(backend)
             )
         }
 
@@ -379,21 +395,32 @@ class MaaCompositionService(
         return withContext(Dispatchers.IO) {
             checkPreconditions(mode, isScheduled)?.let { return@withContext it }
 
-            useRemoteService { service ->
-                val maa = service.maaCoreService
-                ensureMaaInstance(maa)?.let { return@useRemoteService it }
+            try {
+                useRemoteService { service ->
+                    val maa = service.maaCoreService
+                    ensureMaaInstance(maa)?.let { return@useRemoteService it }
 
-                setupDisplayAndConnect(
-                    service,
-                    maa,
-                    mode,
-                    clientType
-                )?.let { return@useRemoteService it }
-                val result = appendTasksAndStart(maa, tasks, successMessage, mode)
-                if (result is StartResult.Success) {
-                    taskChainState.saveLastUsedClientType(clientType)
+                    setupDisplayAndConnect(
+                        service,
+                        maa,
+                        mode,
+                        clientType
+                    )?.let { return@useRemoteService it }
+                    val result = appendTasksAndStart(maa, tasks, successMessage, mode)
+                    if (result is StartResult.Success) {
+                        taskChainState.saveLastUsedClientType(clientType)
+                    }
+                    result
                 }
-                result
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to acquire remote service during start")
+                rejectStart(
+                    "无法连接远程服务：${e.message}",
+                    "REMOTE_ACCESS_UNAVAILABLE",
+                    StartResult.RemoteAccessUnavailable(RemoteAccessCoordinator.configuredBackend())
+                )
             }
         }
     }
@@ -496,6 +523,8 @@ class MaaCompositionService(
     suspend fun stopVirtualDisplay() {
         appWatchdog.stopWatching()
         _displayResolution.value = defaultResolution
-        useRemoteService { it.stopVirtualDisplay() }
+        withContext(Dispatchers.IO) {
+            RemoteServiceManager.getInstanceOrNull()?.stopVirtualDisplay()
+        }
     }
 }
