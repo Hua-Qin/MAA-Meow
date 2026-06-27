@@ -49,7 +49,12 @@ class ExpandedControlPanelViewModel(
     private val _effects = Channel<UiEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
 
-    private var pendingStartContext: TaskStartContext? = null
+    private var pendingStart: PendingStart? = null
+
+    private data class PendingStart(
+        val context: TaskStartContext,
+        val acknowledgement: TaskStartAcknowledgement,
+    )
 
     init {
         viewModelScope.launch {
@@ -192,7 +197,7 @@ class ExpandedControlPanelViewModel(
     }
 
     fun onDialogDismiss() {
-        pendingStartContext = null
+        pendingStart = null
         _state.update { it.copy(dialog = null) }
     }
 
@@ -203,15 +208,11 @@ class ExpandedControlPanelViewModel(
             }
 
             PanelDialogConfirmAction.CONFIRM_PENDING_START -> {
-                val pendingContext = pendingStartContext
+                val pending = pendingStart
                 _state.update { it.copy(dialog = null) }
-                pendingStartContext = null
-                if (pendingContext != null) {
-                    launchManualStart(
-                        pendingContext.acknowledged(
-                            TaskStartAcknowledgement.GAME_NOT_RUNNING_WITHOUT_WAKE_UP
-                        )
-                    )
+                pendingStart = null
+                if (pending != null) {
+                    launchManualStart(pending.context.acknowledged(pending.acknowledgement))
                 }
             }
 
@@ -249,12 +250,12 @@ class ExpandedControlPanelViewModel(
                 )
             ) {
                 is TaskStartDecision.Ready -> {
-                    pendingStartContext = null
+                    pendingStart = null
                     decision.plan
                 }
 
                 is TaskStartDecision.Blocked -> {
-                    pendingStartContext = null
+                    pendingStart = null
                     val message = application.resolveTaskStartDecisionMessage(decision)
                     Timber.w("Validation failed: %s", message.resolve(application))
                     showDialog(application.createStartBlockedDialog(message))
@@ -262,7 +263,7 @@ class ExpandedControlPanelViewModel(
                 }
 
                 is TaskStartDecision.RequiresConfirmation -> {
-                    pendingStartContext = context
+                    pendingStart = PendingStart(context, decision.acknowledgement)
                     showDialog(
                         application.createStartWarningDialog(
                             application.resolveTaskStartDecisionMessage(decision)

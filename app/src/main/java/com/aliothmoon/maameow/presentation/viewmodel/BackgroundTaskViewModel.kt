@@ -91,6 +91,7 @@ class BackgroundTaskViewModel(
 
     private data class PendingStart(
         val context: TaskStartContext,
+        val acknowledgement: TaskStartAcknowledgement,
         val request: ScheduledExecutionRequest? = null,
     )
 
@@ -439,7 +440,7 @@ class BackgroundTaskViewModel(
             }
 
             is TaskStartDecision.RequiresConfirmation -> {
-                pendingStart = PendingStart(context, request)
+                pendingStart = PendingStart(context, decision.acknowledgement, request)
                 val message = application.resolveTaskStartDecisionMessage(decision)
                 showDialog(application.createStartWarningDialog(message))
                 return message
@@ -568,9 +569,7 @@ class BackgroundTaskViewModel(
                 _state.update { it.copy(dialog = null) }
                 pendingStart = null
                 if (pending != null) {
-                    val acked = pending.context.acknowledged(
-                        TaskStartAcknowledgement.GAME_NOT_RUNNING_WITHOUT_WAKE_UP
-                    )
+                    val acked = pending.context.acknowledged(pending.acknowledgement)
                     viewModelScope.launch {
                         val message = startTasksInternal(
                             request = pending.request,
