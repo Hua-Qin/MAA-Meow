@@ -1664,7 +1664,7 @@
     <string name="achievement_Pioneer3_title">DEBUG 急先锋</string>
     <string name="achievement_Pioneer3_desc">能下到这个版本的都不是一般人。</string>
     <string name="achievement_Pioneer3_condition">使用未发布版本的 MAA</string>
-    <string name="achievement_UpdateSuccess1_title">To be countine</string>
+    <string name="achievement_UpdateSuccess1_title">To be continue</string>
     <string name="achievement_UpdateSuccess1_desc">更新完成，新的旅程继续。</string>
     <string name="achievement_UpdateSuccess1_condition">第一次成功更新 MAA</string>
     <string name="achievement_UpdateSuccess2_title">不要停下来啊</string>
