@@ -561,7 +561,7 @@
 
     <!-- dialog: hardware screen off -->
     <string name="dialog_hardware_screen_off_title">确认开启硬件熄屏？</string>
-    <string name="dialog_hardware_screen_off_message">开启后屏幕将完全熄灭，进入极致省电状态。\n• 唤醒说明：需按两次电源键（先亮锁屏，再解锁定）。\n• 屏保模式：不开启则显示屏保时钟，可随时查看任务进度与电量。</string>
+    <string name="dialog_hardware_screen_off_message">开启后，点击「熄屏挂机」将彻底关闭屏幕，进入极致省电状态。\n• 屏幕常亮：启用期间 MaaMeow 在前台时不会自动息屏，以防系统休眠中断任务。\n• 唤醒说明：需按两次电源键（先亮锁屏，再解锁定）。\n• 屏保模式：不开启则显示屏保时钟，可随时查看任务进度与电量。</string>
 
     <!-- update card -->
     <string name="update_card_title">更新管理</string>

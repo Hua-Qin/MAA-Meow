@@ -22,7 +22,6 @@ import com.aliothmoon.maameow.data.achievement.AchievementRepository
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.domain.service.MaaCompositionService
 import com.aliothmoon.maameow.domain.state.MaaExecutionState
-import com.aliothmoon.maameow.overlay.screensaver.HardwareScreenOffManager
 import com.aliothmoon.maameow.overlay.screensaver.ScreenSaverOverlayManager
 import com.aliothmoon.maameow.presentation.navigation.AppNavigation
 import com.aliothmoon.maameow.presentation.viewmodel.BackgroundTaskViewModel
@@ -43,7 +42,6 @@ class MainActivity : AppCompatActivity() {
     private val achievementRepository: AchievementRepository by inject()
     private val compositionService: MaaCompositionService by inject()
     private val screenSaverManager: ScreenSaverOverlayManager by inject()
-    private val hardwareScreenOffManager: HardwareScreenOffManager by inject()
     private val backgroundTaskViewModel: BackgroundTaskViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,12 +103,14 @@ class MainActivity : AppCompatActivity() {
                 combine(
                     compositionService.state,
                     screenSaverManager.showing,
-                    hardwareScreenOffManager.active,
-                ) { taskState, saverShowing, hwScreenOff ->
+                    appSettingsManager.useHardwareScreenOff,
+                ) { taskState, saverShowing, hwFeatureEnabled ->
                     val taskActive = taskState == MaaExecutionState.STARTING
                             || taskState == MaaExecutionState.RUNNING
                             || taskState == MaaExecutionState.STOPPING
-                    taskActive || saverShowing || hwScreenOff
+                    // 启用硬件熄屏功能后，前台时始终保持屏幕常亮、与任务状态解耦：
+                    // 确保系统不会自动休眠/锁屏而中断正在运行的任务，硬件熄屏也无需再维护状态。
+                    hwFeatureEnabled || taskActive || saverShowing
                 }.collect { keepOn ->
                     if (keepOn) {
                         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

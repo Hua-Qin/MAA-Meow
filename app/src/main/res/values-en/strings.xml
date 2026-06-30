@@ -357,7 +357,7 @@
 
     <!-- dialog: hardware screen off -->
     <string name="dialog_hardware_screen_off_title">Enable hardware screen-off?</string>
-    <string name="dialog_hardware_screen_off_message">When enabled, the screen will fully turn off for maximum power saving.\n• Wake-up: press the power button twice (the lock screen lights up first, then unlock).\n• Screen-saver mode: if disabled, a screen-saver clock is shown so you can monitor task progress and battery at any time.</string>
+    <string name="dialog_hardware_screen_off_message">When enabled, tapping "Screen Off" fully turns off the screen for maximum power saving.\n• Stays awake: while enabled, the screen won\'t turn off automatically when MaaMeow is in the foreground, preventing the system from sleeping and interrupting tasks.\n• Wake-up: press the power button twice (the lock screen lights up first, then unlock).\n• Screen-saver mode: if disabled, a screen-saver clock is shown so you can monitor task progress and battery at any time.</string>
 
     <!-- update card -->
     <string name="update_card_title">Updates</string>
