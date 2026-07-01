@@ -24,6 +24,7 @@ import com.aliothmoon.maameow.domain.usecase.TaskStartMode
 import com.aliothmoon.maameow.manager.RemoteServiceManager
 import com.aliothmoon.maameow.presentation.state.BackgroundTaskState
 import com.aliothmoon.maameow.presentation.state.PreviewTouchMarker
+import com.aliothmoon.maameow.presentation.state.UiEffect
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogConfirmAction
 import com.aliothmoon.maameow.presentation.view.panel.PanelDialogUiState
 import com.aliothmoon.maameow.presentation.view.panel.PanelTab
@@ -34,6 +35,8 @@ import com.aliothmoon.maameow.schedule.service.ScheduledLaunchCoordinator
 import com.aliothmoon.maameow.utils.i18n.UiText
 import com.aliothmoon.maameow.utils.i18n.resolve
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -41,6 +44,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -81,6 +85,9 @@ class BackgroundTaskViewModel(
     // 调试截图结果（已本地化的提示文案），供 UI 以 Toast 展示
     private val _screenshotMessage = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val screenshotMessage: SharedFlow<String> = _screenshotMessage.asSharedFlow()
+
+    private val _effects = Channel<UiEffect>(Channel.BUFFERED)
+    val effects: Flow<UiEffect> = _effects.receiveAsFlow()
 
     private val touchPreviewController = TouchPreviewController(viewModelScope)
     val markers: StateFlow<List<PreviewTouchMarker>> = touchPreviewController.markers
@@ -147,6 +154,7 @@ class BackgroundTaskViewModel(
                     && appSettingsManager.closeAppOnTaskEnd.value
                 ) {
                     Timber.i("Task ended (%s), auto closing app", current)
+                    _effects.send(UiEffect.toast(R.string.bg_toast_auto_closed_on_end))
                     compositionService.stopVirtualDisplay()
                 }
                 prev = current

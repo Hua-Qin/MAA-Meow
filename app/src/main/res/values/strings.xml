@@ -556,6 +556,7 @@
     <string name="bg_auto_settings_title">自动设置</string>
     <string name="bg_auto_mute_on_launch">游戏启动时关闭游戏声音</string>
     <string name="bg_auto_close_on_end">任务自动结束时关闭游戏</string>
+    <string name="bg_toast_auto_closed_on_end">任务已结束，已自动关闭游戏</string>
     <string name="bg_auto_hardware_screen_off">熄屏挂机时关闭屏幕</string>
     <string name="bg_auto_show_touch_preview">显示触摸预览</string>
 

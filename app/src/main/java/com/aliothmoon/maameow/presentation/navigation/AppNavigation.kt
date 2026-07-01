@@ -36,6 +36,7 @@ import com.aliothmoon.maameow.overlay.OverlayController
 import com.aliothmoon.maameow.presentation.LocalToaster
 import com.aliothmoon.maameow.presentation.components.AnnouncementDialog
 import com.aliothmoon.maameow.presentation.components.ResourceLoadingOverlay
+import com.aliothmoon.maameow.presentation.state.UiEffect
 import com.aliothmoon.maameow.presentation.view.notification.NotificationSettingsView
 import com.aliothmoon.maameow.presentation.view.settings.AchievementDebugView
 import com.aliothmoon.maameow.presentation.view.settings.AchievementView
@@ -109,6 +110,16 @@ fun AppNavigation(
     LaunchedEffect(notificationService) {
         notificationService.feedbackMessages.collect { message ->
             Toast.makeText(context, message.resolve(context), Toast.LENGTH_SHORT).show()
+        }
+    }
+    LaunchedEffect(backgroundTaskViewModel) {
+        backgroundTaskViewModel.effects.collect { effect ->
+            when (effect) {
+                is UiEffect.Toast -> toaster.show(
+                    message = effect.message.resolve(context),
+                    type = ToastType.Info,
+                )
+            }
         }
     }
     LaunchedEffect(achievementRepository, showAchievementSnackbar) {

@@ -352,6 +352,7 @@
     <string name="bg_auto_settings_title">Automation</string>
     <string name="bg_auto_mute_on_launch">Mute game audio on launch</string>
     <string name="bg_auto_close_on_end">Close game when task ends</string>
+    <string name="bg_toast_auto_closed_on_end">Task finished. Game closed automatically</string>
     <string name="bg_auto_hardware_screen_off">Turn off screen when AFK</string>
     <string name="bg_auto_show_touch_preview">Show touch preview</string>
 
