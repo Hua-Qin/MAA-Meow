@@ -13,6 +13,7 @@ import com.aliothmoon.maameow.data.model.copilot.CopilotTaskData
 import com.aliothmoon.maameow.data.model.copilot.DifficultyFlags
 import com.aliothmoon.maameow.data.preferences.TaskChainState
 import com.aliothmoon.maameow.data.repository.CopilotRepository
+import com.aliothmoon.maameow.data.resource.CopilotResourceProvider
 import com.aliothmoon.maameow.data.resource.ResourceDataManager
 import com.aliothmoon.maameow.domain.service.CopilotManager
 import com.aliothmoon.maameow.domain.service.CopilotRequestException
@@ -103,6 +104,10 @@ data class CopilotUiState(
     val statusMessage: UiText = UiText.Empty,
     val videoUrl: String = "",
     val operatorSummary: OperatorSummaryData? = null,
+    val builtinPickerExpanded: Boolean = false,
+    val builtinLoaded: Boolean = false,
+    val builtinTree: List<CopilotResourceProvider.Node> = emptyList(),
+    val builtinExpandedFolders: Set<String> = emptySet(),
 )
 
 class CopilotViewModel(
@@ -111,6 +116,7 @@ class CopilotViewModel(
     private val compositionService: MaaCompositionService,
     private val repository: CopilotRepository,
     private val resourceDataManager: ResourceDataManager,
+    private val copilotResourceProvider: CopilotResourceProvider,
     private val runtimeStateStore: CopilotRuntimeStateStore,
     private val checkGameReadiness: CheckGameReadinessUseCase,
     private val chainState: TaskChainState,
@@ -219,15 +225,7 @@ class CopilotViewModel(
     fun onImportLocalFiles(files: List<Pair<String, String>>) {
         if (files.isEmpty()) return
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    statusMessage = text(R.string.copilot_status_parsing),
-                    currentCopilot = null,
-                    operatorSummary = null,
-                    videoUrl = "",
-                )
-            }
+            _state.update { it.startingParse() }
             var successCount = 0
             var lastData: CopilotTaskData? = null
             var lastFilePath = ""
@@ -283,20 +281,85 @@ class CopilotViewModel(
         }
     }
 
+    fun onToggleBuiltinPicker() {
+        val expand = !_state.value.builtinPickerExpanded
+        _state.update { it.copy(builtinPickerExpanded = expand) }
+        if (expand && !_state.value.builtinLoaded) {
+            loadBuiltinTree()
+        }
+    }
+
+    private fun loadBuiltinTree() {
+        viewModelScope.launch {
+            val tree = copilotResourceProvider.loadTree()
+            _state.update { it.copy(builtinTree = tree, builtinLoaded = true) }
+        }
+    }
+
+    fun onToggleBuiltinFolder(relativePath: String) {
+        _state.update {
+            val folders = it.builtinExpandedFolders
+            val next = if (relativePath in folders) folders - relativePath else folders + relativePath
+            it.copy(builtinExpandedFolders = next)
+        }
+    }
+
+    fun onSelectBuiltinFile(node: CopilotResourceProvider.Node) {
+        val path = node.fullPath ?: return
+        viewModelScope.launch {
+            _state.update { it.startingParse() }
+            copilotManager.parseFromFile(path).fold(
+                onSuccess = { (data, json) ->
+                    applyLoadedCopilot(
+                        data = data,
+                        json = json,
+                        filePath = path,
+                        copilotId = 0,
+                        fromWeb = false
+                    )
+                    autoAddLoadedCopilotToListIfNeeded(
+                        data = data,
+                        filePath = path,
+                        copilotId = 0,
+                        source = "resource"
+                    )
+                    _state.update { it.copy(builtinPickerExpanded = false) }
+                },
+                onFailure = { e ->
+                    _state.update {
+                        it.copy(isLoading = false, statusMessage = fileReadErrorMessage(e))
+                    }
+                    Timber.e(e, "$TAG: failed to load builtin copilot: %s", path)
+                }
+            )
+        }
+    }
+
+    /** 进入"开始解析"时对 UI 状态的统一重置。 */
+    private fun CopilotUiState.startingParse(): CopilotUiState = copy(
+        isLoading = true,
+        statusMessage = text(R.string.copilot_status_parsing),
+        currentCopilot = null,
+        operatorSummary = null,
+        videoUrl = "",
+    )
+
+    /** 文件读取失败时的状态消息：有明细则附带明细，否则用通用文案。 */
+    private fun fileReadErrorMessage(e: Throwable): UiText {
+        val detail = e.message.orEmpty().trim()
+        return if (detail.isEmpty()) {
+            text(R.string.copilot_file_read_error)
+        } else {
+            text(R.string.copilot_file_read_error_with_detail, detail)
+        }
+    }
+
     private fun parseInput(forceSet: Boolean) {
         val input = _state.value.inputText.trim()
         if (input.isEmpty()) return
 
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    statusMessage = text(R.string.copilot_status_parsing),
-                    currentCopilot = null,
-                    operatorSummary = null,
-                    videoUrl = "",
-                )
-            }
+            _state.update { it.startingParse() }
             if (forceSet || copilotManager.isSetId(input)) {
                 val tabIndex = _state.value.tabIndex
                 if (!supportsCopilotSetImport(tabIndex)) {
@@ -873,15 +936,8 @@ class CopilotViewModel(
                     }
                 },
                 onFailure = { e ->
-                    val detail = e.message.orEmpty().trim()
                     _state.update {
-                        it.copy(
-                            statusMessage = if (detail.isEmpty()) {
-                                text(R.string.copilot_file_read_error)
-                            } else {
-                                text(R.string.copilot_file_read_error_with_detail, detail)
-                            }
-                        )
+                        it.copy(statusMessage = fileReadErrorMessage(e))
                     }
                 }
             )
