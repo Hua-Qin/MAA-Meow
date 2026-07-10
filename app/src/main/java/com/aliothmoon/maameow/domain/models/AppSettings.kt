@@ -35,6 +35,8 @@ data class AppSettings(
 
     @PrefKey(default = "false") val muteOnGameLaunch: String = "false",
 
+    @PrefKey(default = "") val mutedGamePackage: String = "",
+
     @PrefKey(default = "false") val closeAppOnTaskEnd: String = "false",
 
     @PrefKey(default = "false") val useHardwareScreenOff: String = "false",

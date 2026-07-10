@@ -40,6 +40,7 @@ import com.aliothmoon.maameow.domain.service.AppAliveChecker
 import com.aliothmoon.maameow.domain.service.AppWatchdog
 import com.aliothmoon.maameow.domain.service.CopilotManager
 import com.aliothmoon.maameow.domain.service.ExternalNotificationService
+import com.aliothmoon.maameow.domain.service.GameMuteCoordinator
 import com.aliothmoon.maameow.domain.service.LogExportService
 import com.aliothmoon.maameow.domain.service.MaaCompositionService
 import com.aliothmoon.maameow.domain.service.MaaEventNotifier
@@ -154,6 +155,7 @@ val appModule = module {
     singleOf(::AppWatchdog)
     singleOf(::MaaCompositionService)
     single<MaaExecutionStateHolder> { get<MaaCompositionService>() }
+    singleOf(::GameMuteCoordinator)
     singleOf(::MaaCallbackDispatcher)
 
     singleOf(::UnifiedStateDispatcher)

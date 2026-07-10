@@ -262,6 +262,18 @@ class AppSettingsManager(
         }
     }
 
+    // 游戏静音 write-ahead 标记（语义见 AppSettings.mutedGamePackage）
+    val mutedGamePackage: StateFlow<String> = settings
+        .map { it.mutedGamePackage }
+        .distinctUntilChanged()
+        .stateIn(scope, SharingStarted.Eagerly, initialSettings.mutedGamePackage)
+
+    suspend fun setMutedGamePackage(packageName: String) {
+        with(AppSettingsSchema) {
+            context.dataStore.edit { it[mutedGamePackage] = packageName }
+        }
+    }
+
     // 任务结束时关闭应用
     val closeAppOnTaskEnd: StateFlow<Boolean> = settings
         .map { it.closeAppOnTaskEnd.toBooleanStrictOrNull() ?: false }
