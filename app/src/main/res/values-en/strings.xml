@@ -671,7 +671,7 @@
     <string name="panel_autobattle_tab_paradox">Paradox Simulation</string>
     <string name="panel_autobattle_tab_other">Other Activities</string>
     <string name="panel_autobattle_station_code_label">Copilot Code</string>
-    <string name="panel_autobattle_station_code_placeholder">Enter maa://1234 or 1234</string>
+    <string name="panel_autobattle_station_code_placeholder">Enter prts://1234, prts://s1234 or 1234</string>
     <string name="panel_autobattle_waiting">Waiting for input…</string>
     <string name="panel_autobattle_loading">Loading…</string>
     <string name="panel_autobattle_read_single">Load Copilot</string>

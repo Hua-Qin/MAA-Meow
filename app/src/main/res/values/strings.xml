@@ -726,7 +726,7 @@
     <string name="panel_autobattle_tab_paradox">悖论模拟</string>
     <string name="panel_autobattle_tab_other">其他活动</string>
     <string name="panel_autobattle_station_code_label">作业站神秘代码</string>
-    <string name="panel_autobattle_station_code_placeholder">输入 maa://1234、1234</string>
+    <string name="panel_autobattle_station_code_placeholder">输入 prts://1234、prts://s1234 或 1234</string>
     <string name="panel_autobattle_waiting">等待操作…</string>
     <string name="panel_autobattle_loading">读取中…</string>
     <string name="panel_autobattle_read_single">读取作业</string>

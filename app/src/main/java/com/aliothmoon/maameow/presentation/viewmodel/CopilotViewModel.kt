@@ -15,6 +15,7 @@ import com.aliothmoon.maameow.data.preferences.TaskChainState
 import com.aliothmoon.maameow.data.repository.CopilotRepository
 import com.aliothmoon.maameow.data.resource.CopilotResourceProvider
 import com.aliothmoon.maameow.data.resource.ResourceDataManager
+import com.aliothmoon.maameow.domain.service.CopilotCodeType
 import com.aliothmoon.maameow.domain.service.CopilotManager
 import com.aliothmoon.maameow.domain.service.CopilotRequestException
 import com.aliothmoon.maameow.domain.service.MaaCompositionService
@@ -360,7 +361,15 @@ class CopilotViewModel(
 
         viewModelScope.launch {
             _state.update { it.startingParse() }
-            if (forceSet || copilotManager.isSetId(input)) {
+            // 新格式神秘代码（prts://、prts://s、s 前缀）自带类型信息，无论点的是哪个按钮都按解析结果路由；
+            // 旧格式（maa://、纯数字）类型不明确，沿用按钮上下文
+            val code = copilotManager.parseCopilotCode(input)
+            val asSet = if (code != null && !code.ambiguous) {
+                code.type == CopilotCodeType.COPILOT_SET
+            } else {
+                forceSet
+            }
+            if (asSet) {
                 val tabIndex = _state.value.tabIndex
                 if (!supportsCopilotSetImport(tabIndex)) {
                     _state.update {
@@ -401,7 +410,10 @@ class CopilotViewModel(
                 )
             },
             onFailure = { remoteErr ->
-                val unsupportedLocalPath = input.contains("\\") || input.contains("/")
+                // 仅当输入连神秘代码都解析不出、且形似路径时才提示本地路径不支持，
+                // 避免 maa:// / prts:// 代码的网络失败被误报
+                val unsupportedLocalPath = remoteErr is CopilotRequestException.InvalidInput &&
+                        (input.contains("\\") || input.contains("/"))
                 _state.update {
                     it.copy(
                         isLoading = false,
