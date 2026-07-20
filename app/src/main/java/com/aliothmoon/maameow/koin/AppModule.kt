@@ -64,6 +64,7 @@ import com.aliothmoon.maameow.maa.callback.TaskChainHandler
 import com.aliothmoon.maameow.maa.callback.TaskChainStatusTracker
 import com.aliothmoon.maameow.maa.callback.ToolboxResultCollector
 import com.aliothmoon.maameow.manager.PermissionManager
+import com.aliothmoon.maameow.manager.RemoteGameAudioAdapter
 import com.aliothmoon.maameow.manager.ShizukuReadinessProvider
 import com.aliothmoon.maameow.overlay.OverlayController
 import com.aliothmoon.maameow.overlay.OverlayViewModelOwner
@@ -157,7 +158,7 @@ val appModule = module {
     singleOf(::AppWatchdog)
     singleOf(::MaaCompositionService)
     single<MaaExecutionStateHolder> { get<MaaCompositionService>() }
-    singleOf(::GameMuteCoordinator)
+    single { GameMuteCoordinator(get(), RemoteGameAudioAdapter) }
     singleOf(::MaaCallbackDispatcher)
 
     singleOf(::UnifiedStateDispatcher)

@@ -32,6 +32,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +51,7 @@ class MaaCompositionService(
     private val context: Context,
     private val resourceLoader: MaaResourceLoader,
     private val appSettings: AppSettingsManager,
+    private val gameMuteCoordinator: GameMuteCoordinator,
     private val unifiedStateDispatcher: UnifiedStateDispatcher,
     private val sessionLogger: MaaSessionLogger,
     private val activityManager: ActivityManager,
@@ -527,10 +529,21 @@ class MaaCompositionService(
     }
 
     suspend fun stopVirtualDisplay() {
-        appWatchdog.stopWatching()
-        _displayResolution.value = defaultResolution
-        withContext(Dispatchers.IO) {
-            RemoteServiceManager.getInstanceOrNull()?.stopVirtualDisplay()
+        gameMuteCoordinator.prepareForGameSessionClose()
+        try {
+            appWatchdog.stopWatching()
+            _displayResolution.value = defaultResolution
+            withContext(Dispatchers.IO) {
+                val service = RemoteServiceManager.getInstanceOrNull()
+                    ?: return@withContext
+                service.stopVirtualDisplay()
+            }
+        } finally {
+            withContext(NonCancellable) {
+                if (!gameMuteCoordinator.onGameSessionClosed()) {
+                    Timber.w("Virtual display close did not restore managed game audio; retry pending")
+                }
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import com.aliothmoon.maameow.data.model.update.UpdateChannel
 import com.aliothmoon.maameow.data.model.update.UpdateSource
 import com.aliothmoon.maameow.domain.models.AppSettings
 import com.aliothmoon.maameow.domain.models.AppSettingsSchema
+import com.aliothmoon.maameow.domain.models.DesiredGameAudio
 import com.aliothmoon.maameow.domain.models.OverlayControlMode
 import com.aliothmoon.maameow.domain.models.RemoteBackend
 import com.aliothmoon.maameow.domain.models.RunMode
@@ -262,15 +263,27 @@ class AppSettingsManager(
         }
     }
 
-    // 游戏静音 write-ahead 标记（语义见 AppSettings.mutedGamePackage）
+    // 受管游戏音量状态（语义见 AppSettings.mutedGamePackage / desiredGameAudio）
     val mutedGamePackage: StateFlow<String> = settings
         .map { it.mutedGamePackage }
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, initialSettings.mutedGamePackage)
 
-    suspend fun setMutedGamePackage(packageName: String) {
+    internal suspend fun setManagedGameAudio(packageName: String, desired: DesiredGameAudio) {
         with(AppSettingsSchema) {
-            context.dataStore.edit { it[mutedGamePackage] = packageName }
+            context.dataStore.edit {
+                it[mutedGamePackage] = packageName
+                it[desiredGameAudio] = desired.name
+            }
+        }
+    }
+
+    internal suspend fun clearManagedGameAudio() {
+        with(AppSettingsSchema) {
+            context.dataStore.edit {
+                it[mutedGamePackage] = ""
+                it[desiredGameAudio] = DesiredGameAudio.MUTED.name
+            }
         }
     }
 

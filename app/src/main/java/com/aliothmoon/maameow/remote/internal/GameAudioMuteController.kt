@@ -74,8 +74,14 @@ object GameAudioMuteController {
             muted.remove(pkg)
             return true
         }
-        // 无条件恢复 appops：状态持久、跨远端进程存活，即使本进程没跟踪该包也可能处于 ignore
-        val target = record?.originalMode ?: AppOpsManager.MODE_ALLOWED
+        // AppOps 跨远端进程存活：记录丢失时只修正 MaaMeow 会设置的 IGNORED，
+        // 已恢复成 DEFAULT 等其他 mode 时保持原值，保证重复恢复幂等。
+        val target = record?.originalMode ?: targetModeForUntrackedRestore(
+            AppOpsHelper.checkPlayAudioMode(pkg, uid)
+        ) ?: run {
+            Ln.i("$TAG: $pkg is already audible; preserving current appops mode")
+            return true
+        }
         val ok = AppOpsHelper.setPlayAudioMode(pkg, uid, target)
         if (ok) {
             // 校验成功才移除记录；失败时保留 originalMode，重试仍能还原原值
@@ -86,4 +92,11 @@ object GameAudioMuteController {
         }
         return ok
     }
+
+    internal fun targetModeForUntrackedRestore(currentMode: Int): Int? =
+        if (currentMode >= 0 && currentMode != AppOpsManager.MODE_IGNORED) {
+            null
+        } else {
+            AppOpsManager.MODE_ALLOWED
+        }
 }
