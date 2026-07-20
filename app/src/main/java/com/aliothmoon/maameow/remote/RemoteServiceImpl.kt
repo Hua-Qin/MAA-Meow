@@ -64,6 +64,7 @@ class RemoteServiceImpl : RemoteService.Stub() {
     private var setup = false
 
     init {
+        Workarounds.apply()
         startHeartbeatWatchdog()
         RemoteBootTrace.mark("CTOR_BEFORE_MAA_SERVICE")
         Ln.i("$TAG: RemoteServiceImpl init, version: ${MaaCoreManager.maaService.GetVersion()}")
@@ -113,7 +114,6 @@ class RemoteServiceImpl : RemoteService.Stub() {
                 }
                 Ln.i("MaaCore ${AsstGetVersion()}")
             }
-            Workarounds.apply()
             PermissionGrantHelper.disablePhantomProcessKiller()
             setup = true
         }
