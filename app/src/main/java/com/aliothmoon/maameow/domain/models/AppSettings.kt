@@ -35,14 +35,8 @@ data class AppSettings(
 
     @PrefKey(default = "false") val muteOnGameLaunch: String = "false",
 
-    /** 非空表示存在由 MaaMeow 管理的游戏音量状态。 */
+    /** 非空表示该包可能残留 MaaMeow 设置的静音，需要在关闭或重连时恢复。 */
     @PrefKey(default = "") val mutedGamePackage: String = "",
-
-    /**
-     * 受管游戏音量应收敛到的目标。默认 MUTED 兼容只有 [mutedGamePackage] 的旧数据；
-     * AUDIBLE 表示恢复声音尚未完成，远端重连时必须继续恢复而不是重新静音。
-     */
-    @PrefKey(default = "MUTED") val desiredGameAudio: String = "MUTED",
 
     @PrefKey(default = "false") val closeAppOnTaskEnd: String = "false",
 

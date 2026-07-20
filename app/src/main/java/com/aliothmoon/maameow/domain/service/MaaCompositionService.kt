@@ -529,7 +529,6 @@ class MaaCompositionService(
     }
 
     suspend fun stopVirtualDisplay() {
-        gameMuteCoordinator.prepareForGameSessionClose()
         try {
             appWatchdog.stopWatching()
             _displayResolution.value = defaultResolution
@@ -540,7 +539,7 @@ class MaaCompositionService(
             }
         } finally {
             withContext(NonCancellable) {
-                if (!gameMuteCoordinator.onGameSessionClosed()) {
+                if (!gameMuteCoordinator.unmute()) {
                     Timber.w("Virtual display close did not restore managed game audio; retry pending")
                 }
             }

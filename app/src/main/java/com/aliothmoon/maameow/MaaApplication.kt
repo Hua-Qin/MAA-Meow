@@ -61,7 +61,7 @@ class MaaApplication : Application() {
         crashHandler.init(this)
         overlayController.setup()
         unifiedStateDispatcher.start()
-        gameMuteCoordinator.start()
+        gameMuteCoordinator.startAutoRestore()
         cleanCachedUpdateApks()
         doSyncScheduleAlarms()
     }
