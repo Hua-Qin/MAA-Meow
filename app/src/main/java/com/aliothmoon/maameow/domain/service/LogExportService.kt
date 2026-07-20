@@ -34,10 +34,10 @@ class LogExportService(
     }
 
     /**
-     * 导出所有日志为 ZIP 文件并返回分享 Intent
-     * @return 分享 Intent，失败返回 null
+     * 导出所有日志为 ZIP 文件，返回生成的 ZIP File。
+     * 失败或无日志时返回 null。
      */
-    suspend fun exportAllLogs(): Intent? = withContext(Dispatchers.IO) {
+    suspend fun exportZip(): File? = withContext(Dispatchers.IO) {
         try {
             val dir = File(pathConfig.debugDir)
             if (!dir.exists()) {
@@ -45,30 +45,23 @@ class LogExportService(
                 return@withContext null
             }
 
-            // 创建导出目录
             val exportDir = File(dir, EXPORT_DIR)
             exportDir.mkdirs()
 
-            // 清理旧的导出文件
             cleanupOldExports(exportDir)
 
-            // 导出前清理过期的源日志
             val cleaned = cleanupBeforeExport(dir)
             Timber.i("Pre-export cleanup: removed $cleaned files")
 
-            // 生成 ZIP 文件名
             val zipFileName = "maa_logs_${ZonedDateTime.now().format(DATE_FORMAT)}.zip"
             val zipFile = File(exportDir, zipFileName)
 
-            // 收集所有日志文件
             val logFiles = collectAllLogFiles(dir)
-
             if (logFiles.isEmpty()) {
                 Timber.w("No log files found to export")
                 return@withContext null
             }
 
-            // 打包为 ZIP
             createZipFile(zipFile, logFiles, dir)
 
             Timber.i("Exported ${logFiles.size} log files to ${zipFile.absolutePath}")
@@ -76,9 +69,48 @@ class LogExportService(
                 event = AchievementEvents.LOG_EXPORTED
             }
 
-            createShareIntent(zipFile)
+            zipFile
         } catch (e: Exception) {
             Timber.e(e, "Failed to export logs")
+            null
+        }
+    }
+
+    /**
+     * 导出所有日志为 ZIP 文件并返回分享 Intent
+     * @return 分享 Intent，失败返回 null
+     */
+    suspend fun exportAllLogs(): Intent? = exportZip()?.let { createShareIntent(it) }
+
+    /**
+     * 把导出的 ZIP 写入用户指定的 [targetUri]（通常来自 SAF CreateDocument）。
+     * @return 成功时返回文件显示名（查询 [android.provider.OpenableColumns.DISPLAY_NAME]），
+     *         查询失败时回退到内部生成的 ZIP 文件名；写入失败返回 null
+     */
+    suspend fun exportToUri(targetUri: android.net.Uri): String? = withContext(Dispatchers.IO) {
+        val zip = exportZip() ?: return@withContext null
+        try {
+            context.contentResolver.openOutputStream(targetUri)?.use { out ->
+                zip.inputStream().use { it.copyTo(out) }
+            } ?: return@withContext null
+            queryDisplayName(targetUri) ?: zip.name
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to export to uri: $targetUri")
+            null
+        }
+    }
+
+    private fun queryDisplayName(uri: android.net.Uri): String? {
+        return try {
+            context.contentResolver.query(
+                uri,
+                arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
+                null, null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst() && !cursor.isNull(0)) cursor.getString(0) else null
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to query DISPLAY_NAME for $uri")
             null
         }
     }
@@ -100,7 +132,6 @@ class LogExportService(
                     // logcat：无轮转，放宽单文件大小
                     rel.contains("/logcat/") ->
                         file.length() <= LogConfig.MAX_EXPORT_LOGCAT_FILE_SIZE
-                    // 其他目录：排除二进制图片，并按默认大小过滤
                     else ->
                         file.extension.lowercase() !in setOf("png", "jpg", "jpeg") &&
                                 file.length() <= LogConfig.MAX_EXPORT_SINGLE_FILE_SIZE
@@ -176,7 +207,6 @@ class LogExportService(
                 }
                 totalSize += file.length()
 
-                // 使用相对路径作为 ZIP 中的路径
                 val relativePath = file.relativeTo(baseDir).path
                 val entry = ZipEntry(relativePath)
                 entry.time = file.lastModified()
@@ -196,7 +226,7 @@ class LogExportService(
         val uri = FileProvider.getUriForFile(context, authority, zipFile)
 
         return Intent(Intent.ACTION_SEND).apply {
-            type = "application/zip"
+            type = "application/octet-stream"
             putExtra(Intent.EXTRA_STREAM, uri)
             putExtra(Intent.EXTRA_SUBJECT, "MaaMeow 日志导出")
             putExtra(
@@ -206,14 +236,10 @@ class LogExportService(
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss (Z)"))
                 }"
             )
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
         }
     }
 
-    /**
-     * 导出前清理
-     */
     private suspend fun cleanupBeforeExport(debugDir: File): Int {
         var deleted = sessionLogger.cleanupOldLogs(LogConfig.MAX_TASK_LOG_DAYS)
         listOf("logcat", "screenshots", "crash_logs").forEach { sub ->

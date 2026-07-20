@@ -41,6 +41,11 @@
     <string name="settings_log_export_title">Export Log Archive</string>
     <string name="settings_log_export_desc">Package all logs into a ZIP file to share</string>
     <string name="settings_log_export_chooser_title">Export Logs</string>
+    <string name="log_export_save_to_device">Save to Device</string>
+    <string name="log_export_share">Share with Other Apps</string>
+    <string name="log_export_save_success">Saved: %1$s</string>
+    <string name="log_export_failed">Export failed — make sure there are logs to export</string>
+    <string name="log_export_in_progress">Exporting…</string>
     <string name="settings_debug_mode_title">Debug Mode</string>
     <string name="settings_debug_mode_desc">Record detailed log information when enabled</string>
     <string name="settings_section_display">Display</string>

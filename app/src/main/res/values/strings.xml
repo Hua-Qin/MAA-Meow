@@ -237,6 +237,11 @@
     <string name="settings_log_export_title">导出日志压缩包</string>
     <string name="settings_log_export_desc">打包所有日志为 ZIP 文件分享</string>
     <string name="settings_log_export_chooser_title">导出日志</string>
+    <string name="log_export_save_to_device">保存到设备</string>
+    <string name="log_export_share">分享给其他应用</string>
+    <string name="log_export_save_success">已保存：%1$s</string>
+    <string name="log_export_failed">导出失败，请确认有可导出的日志</string>
+    <string name="log_export_in_progress">正在导出…</string>
     <string name="settings_debug_mode_title">调试模式</string>
     <string name="settings_debug_mode_desc">启用后记录详细日志信息</string>
 

@@ -75,13 +75,13 @@ import com.aliothmoon.maameow.data.model.update.UpdateChannel
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.domain.models.RemoteBackend
 import com.aliothmoon.maameow.domain.service.AchievementReporter
-import com.aliothmoon.maameow.domain.service.LogExportService
 import com.aliothmoon.maameow.domain.service.ResourceInitService
 import com.aliothmoon.maameow.domain.state.ResourceInitState
 import com.aliothmoon.maameow.manager.ShizukuInstallHelper
 import com.aliothmoon.maameow.presentation.components.AdaptiveTaskPromptDialog
 import com.aliothmoon.maameow.presentation.components.ITextField
 import com.aliothmoon.maameow.presentation.components.ListItemDivider
+import com.aliothmoon.maameow.presentation.components.LogExportController
 import com.aliothmoon.maameow.presentation.components.ReInitializeConfirmDialog
 import com.aliothmoon.maameow.presentation.components.ResourceInitDialog
 import com.aliothmoon.maameow.presentation.components.SectionHeader
@@ -107,7 +107,6 @@ fun SettingsView(
     onViewAnnouncement: () -> Unit = {},
     viewModel: SettingsViewModel = koinViewModel(),
     resourceInitService: ResourceInitService = koinInject(),
-    logExportService: LogExportService = koinInject(),
     achievementReporter: AchievementReporter = koinInject(),
 ) {
     val resourceInitState by resourceInitService.state.collectAsStateWithLifecycle()
@@ -189,6 +188,12 @@ fun SettingsView(
 
     var showReInitConfirm by remember { mutableStateOf(false) }
     var showDebugModeConfirm by remember { mutableStateOf(false) }
+    var showExportSheet by remember { mutableStateOf(false) }
+
+    LogExportController(
+        sheetVisible = showExportSheet,
+        onSheetDismiss = { showExportSheet = false },
+    )
     var showRunScheduleWhenLockedConfirm by remember { mutableStateOf(false) }
 
     if (showRestartDialog) {
@@ -450,24 +455,12 @@ fun SettingsView(
                         navController.navigate("error_log")
                     }
                     ListItemDivider()
-                    val logExportChooserTitle =
-                        stringResource(R.string.settings_log_export_chooser_title)
                     SettingClickItem(
                         title = stringResource(R.string.settings_log_export_title),
                         description = stringResource(R.string.settings_log_export_desc),
                         contentColor = contentColor
                     ) {
-                        coroutineScope.launch {
-                            val intent = logExportService.exportAllLogs()
-                            if (intent != null) {
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        intent,
-                                        logExportChooserTitle
-                                    )
-                                )
-                            }
-                        }
+                        showExportSheet = true
                     }
                     ListItemDivider()
                     SettingSwitchItem(
