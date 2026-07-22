@@ -658,6 +658,7 @@
     <string name="settings_about_developer">开发者</string>
     <string name="settings_about_qq_group_title">问题反馈 QQ 群</string>
     <string name="settings_about_qq_group_desc">遇到问题或有建议？欢迎加群交流反馈</string>
+    <string name="settings_about_customer_service">客服 QQ</string>
     <string name="settings_about_announcement">查看公告</string>
     <string name="settings_about_star">⭐ 喜欢就给个 Star 吧</string>
 

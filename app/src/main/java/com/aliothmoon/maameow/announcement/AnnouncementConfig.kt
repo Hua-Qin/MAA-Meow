@@ -2,6 +2,7 @@ package com.aliothmoon.maameow.announcement
 
 import android.content.Context
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
+import com.aliothmoon.maameow.domain.service.ValidationService
 import java.io.IOException
 import java.util.Locale
 
@@ -18,6 +19,10 @@ object AnnouncementConfig {
         } catch (_: IOException) {
             ""
         }
+    }
+
+    fun loadRemoteContent(validationService: ValidationService): String {
+        return validationService.getCurrentNotice()
     }
 
     fun imageAssetPath(language: AppSettingsManager.AppLanguage): String =

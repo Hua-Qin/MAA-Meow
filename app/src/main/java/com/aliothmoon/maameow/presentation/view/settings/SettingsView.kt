@@ -76,6 +76,7 @@ import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.domain.models.RemoteBackend
 import com.aliothmoon.maameow.domain.service.AchievementReporter
 import com.aliothmoon.maameow.domain.service.ResourceInitService
+import com.aliothmoon.maameow.domain.service.ValidationService
 import com.aliothmoon.maameow.domain.state.ResourceInitState
 import com.aliothmoon.maameow.manager.ShizukuInstallHelper
 import com.aliothmoon.maameow.presentation.components.AdaptiveTaskPromptDialog
@@ -108,8 +109,10 @@ fun SettingsView(
     viewModel: SettingsViewModel = koinViewModel(),
     resourceInitService: ResourceInitService = koinInject(),
     achievementReporter: AchievementReporter = koinInject(),
+    validationService: ValidationService = koinInject(),
 ) {
     val resourceInitState by resourceInitService.state.collectAsStateWithLifecycle()
+    val appConfig by validationService.appConfig.collectAsStateWithLifecycle()
     val debugMode by viewModel.debugMode.collectAsStateWithLifecycle()
     val autoCheckUpdate by viewModel.autoCheckUpdate.collectAsStateWithLifecycle()
     val autoDownloadUpdate by viewModel.autoDownloadUpdate.collectAsStateWithLifecycle()
@@ -739,13 +742,25 @@ fun SettingsView(
                         contentColor = contentColor
                     )
                     ListItemDivider()
+                    appConfig?.appQq?.takeIf { it.isNotEmpty() }?.let { qq ->
+                        SettingClickItem(
+                            title = stringResource(R.string.settings_about_customer_service),
+                            description = qq,
+                            contentColor = contentColor
+                        ) {
+                            Misc.openUriSafely(context, "mqq://im/chat?chat_type=wpa&uin=$qq&version=1&src_type=web")
+                        }
+                        ListItemDivider()
+                    }
+                    val groupChatUrl = appConfig?.appGroupchat?.takeIf { it.isNotEmpty() } 
+                        ?: "https://qm.qq.com/q/j4CFbeDQXu"
                     SettingClickItem(
                         title = stringResource(R.string.settings_about_qq_group_title),
                         description = stringResource(R.string.settings_about_qq_group_desc),
                         contentColor = contentColor
                     ) {
                         achievementReporter.reportFeedbackGroupOpened()
-                        Misc.openUriSafely(context, "https://qm.qq.com/q/j4CFbeDQXu")
+                        Misc.openUriSafely(context, groupChatUrl)
                     }
                     ListItemDivider()
                     SettingClickItem(

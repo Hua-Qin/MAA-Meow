@@ -13,6 +13,7 @@ import com.aliothmoon.maameow.presentation.viewmodel.SettingsViewModel
 import com.aliothmoon.maameow.presentation.viewmodel.TaskOverrideEditorViewModel
 import com.aliothmoon.maameow.presentation.viewmodel.ToolboxViewModel
 import com.aliothmoon.maameow.presentation.viewmodel.UpdateViewModel
+import com.aliothmoon.maameow.presentation.viewmodel.ValidationViewModel
 import com.aliothmoon.maameow.schedule.ui.ScheduleEditViewModel
 import com.aliothmoon.maameow.schedule.ui.ScheduleListViewModel
 import com.aliothmoon.maameow.schedule.ui.ScheduleTriggerLogViewModel
@@ -35,6 +36,7 @@ val viewModelModule = module {
     viewModelOf(::ScheduleTriggerLogViewModel)
     viewModelOf(::NotificationSettingsViewModel)
     viewModelOf(::TaskOverrideEditorViewModel)
+    viewModelOf(::ValidationViewModel)
 }
 
 

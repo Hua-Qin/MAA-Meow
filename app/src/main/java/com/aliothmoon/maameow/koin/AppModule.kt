@@ -6,6 +6,7 @@ import com.aliothmoon.maameow.data.api.ETagCacheManager
 import com.aliothmoon.maameow.data.api.HttpClientHelper
 import com.aliothmoon.maameow.data.api.MaaApiService
 import com.aliothmoon.maameow.data.api.MirrorChyanApiClient
+import com.aliothmoon.maameow.data.api.validation.ValidationApiService
 import com.aliothmoon.maameow.data.config.MaaPathConfig
 import com.aliothmoon.maameow.data.datasource.AppDownloader
 import com.aliothmoon.maameow.data.datasource.AssetExtractor
@@ -52,6 +53,7 @@ import com.aliothmoon.maameow.domain.service.RemoteAppAliveChecker
 import com.aliothmoon.maameow.domain.service.ResourceInitService
 import com.aliothmoon.maameow.domain.service.ToolboxExportService
 import com.aliothmoon.maameow.domain.service.UnifiedStateDispatcher
+import com.aliothmoon.maameow.domain.service.ValidationService
 import com.aliothmoon.maameow.domain.service.update.UpdateService
 import com.aliothmoon.maameow.domain.service.update.checker.AppVersionChecker
 import com.aliothmoon.maameow.domain.service.update.checker.ResourceVersionChecker
@@ -97,6 +99,7 @@ val appModule = module {
     singleOf(::HttpClientHelper)
     singleOf(::ETagCacheManager)
     singleOf(::MaaApiService)
+    singleOf(::ValidationApiService)
     singleOf(::PermissionManager)
     singleOf(::ShizukuReadinessProvider)
 
@@ -124,6 +127,7 @@ val appModule = module {
     single<ResourceVersionChecker> { MirrorChyanResourceVersionChecker(get()) }
 
     singleOf(::UpdateService)
+    singleOf(::ValidationService)
 
     singleOf(::ResourceInitService)
     singleOf(::MaaResourceLoader)

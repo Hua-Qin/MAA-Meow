@@ -29,10 +29,12 @@ import com.aliothmoon.maameow.constant.Routes
 import com.aliothmoon.maameow.data.preferences.AppSettingsManager
 import com.aliothmoon.maameow.domain.models.RunMode
 import com.aliothmoon.maameow.domain.service.ExternalNotificationService
+import com.aliothmoon.maameow.domain.service.ValidationService
 import com.aliothmoon.maameow.overlay.OverlayController
 import com.aliothmoon.maameow.presentation.LocalToaster
 import com.aliothmoon.maameow.presentation.components.AnnouncementDialog
 import com.aliothmoon.maameow.presentation.components.ResourceLoadingOverlay
+import com.aliothmoon.maameow.presentation.components.ValidationDialog
 import com.aliothmoon.maameow.presentation.state.UiEffect
 import com.aliothmoon.maameow.presentation.view.notification.NotificationSettingsView
 import com.aliothmoon.maameow.presentation.view.settings.AchievementDebugView
@@ -42,6 +44,7 @@ import com.aliothmoon.maameow.presentation.view.settings.LogHistoryView
 import com.aliothmoon.maameow.presentation.view.settings.TaskOverrideEditorView
 import com.aliothmoon.maameow.presentation.viewmodel.AppEventsViewModel
 import com.aliothmoon.maameow.presentation.viewmodel.BackgroundTaskViewModel
+import com.aliothmoon.maameow.presentation.viewmodel.ValidationViewModel
 import com.aliothmoon.maameow.schedule.model.CountdownState
 import com.aliothmoon.maameow.schedule.ui.CountdownDialog
 import com.aliothmoon.maameow.schedule.ui.ScheduleEditView
@@ -67,6 +70,7 @@ fun AppNavigation(
     notificationService: ExternalNotificationService = koinInject(),
     overlayController: OverlayController = koinInject(),
     appEventsViewModel: AppEventsViewModel = koinViewModel(),
+    validationService: ValidationService = koinInject(),
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -86,6 +90,33 @@ fun AppNavigation(
     val announcementReadVersion by appSettings.announcementReadVersion.collectAsStateWithLifecycle()
     val language by appSettings.language.collectAsStateWithLifecycle()
     val scheduledCountdownState by backgroundTaskViewModel.coordinator.countdownState.collectAsStateWithLifecycle()
+
+    val validationState by validationService.validationState.collectAsStateWithLifecycle()
+    val validationViewModel: ValidationViewModel = koinViewModel()
+    var showValidationDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val state = validationService.validateOnStartup()
+        when (state) {
+            ValidationService.ValidationState.NeedLogin,
+            ValidationService.ValidationState.Expired -> {
+                showValidationDialog = true
+            }
+            else -> {
+                validationViewModel.refreshNotice()
+            }
+        }
+    }
+
+    LaunchedEffect(validationState) {
+        when (validationState) {
+            ValidationService.ValidationState.NeedLogin,
+            ValidationService.ValidationState.Expired -> {
+                showValidationDialog = true
+            }
+            else -> {}
+        }
+    }
 
     // 判断是否处于主 Tab 页面
     val isOnMainTab = currentNavRoute == null || currentNavRoute in MAIN_TAB_ROUTES
@@ -207,9 +238,11 @@ fun AppNavigation(
         // 长期公告弹窗：每次公告版本变更后首次启动自动弹出，或从设置中手动打开
         val needsToShow = announcementReadVersion != AnnouncementConfig.CURRENT_VERSION
         val showAnnouncement = forceShowAnnouncement || (needsToShow && !announcementDismissedOnce)
-        val announcementMarkdown = remember(showAnnouncement, language) {
+        val remoteNotice = validationService.currentNotice.value
+        val announcementMarkdown = remember(showAnnouncement, language, remoteNotice) {
             if (showAnnouncement) {
-                AnnouncementConfig.loadContent(context, language)
+                val remoteContent = remoteNotice.takeIf { it.isNotBlank() }
+                remoteContent ?: AnnouncementConfig.loadContent(context, language)
             } else {
                 null
             }
@@ -230,5 +263,16 @@ fun AppNavigation(
                 },
             )
         }
+
+        // 卡密验证弹窗
+        ValidationDialog(
+            isVisible = showValidationDialog,
+            onDismiss = {},
+            onLoginSuccess = {
+                showValidationDialog = false
+                validationViewModel.refreshNotice()
+            },
+            viewModel = validationViewModel
+        )
     }
 }
