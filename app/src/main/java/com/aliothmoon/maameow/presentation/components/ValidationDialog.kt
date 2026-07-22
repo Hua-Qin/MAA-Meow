@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aliothmoon.maameow.R
 
 @Composable
@@ -36,17 +38,17 @@ fun ValidationDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
     onLoginSuccess: () -> Unit,
-    viewModel: com.aliothmoon.maameow.presentation.viewmodel.ValidationViewModel
+    viewModel: com.aliothmoon.maameow.presentation.viewmodel.ValidationViewModel = viewModel()
 ) {
     if (!isVisible) return
 
     var kamiInput by remember { mutableStateOf("") }
-    val isLoading by viewModel.isLoading
-    val errorMessage by viewModel.errorMessage
-    val loginSuccess by viewModel.loginSuccess
+    val isLoading = viewModel.isLoading.collectAsStateWithLifecycle()
+    val errorMessage = viewModel.errorMessage.collectAsStateWithLifecycle()
+    val loginSuccess = viewModel.loginSuccess.collectAsStateWithLifecycle()
 
-    LaunchedEffect(loginSuccess) {
-        if (loginSuccess) {
+    LaunchedEffect(loginSuccess.value) {
+        if (loginSuccess.value) {
             viewModel.resetLoginSuccess()
             onLoginSuccess()
         }
@@ -100,11 +102,11 @@ fun ValidationDialog(
                     placeholder = { Text("请输入您的卡密") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    isError = errorMessage != null,
+                    isError = errorMessage.value != null,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                errorMessage?.let {
+                errorMessage.value?.let {
                     Text(
                         text = it,
                         color = MaterialTheme.colorScheme.error,
@@ -115,10 +117,10 @@ fun ValidationDialog(
 
                 Button(
                     onClick = { viewModel.login() },
-                    enabled = isLoading.not() && kamiInput.isNotBlank(),
+                    enabled = !isLoading.value && kamiInput.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (isLoading) {
+                    if (isLoading.value) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp

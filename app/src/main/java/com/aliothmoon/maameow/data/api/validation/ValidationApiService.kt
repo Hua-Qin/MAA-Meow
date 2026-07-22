@@ -143,9 +143,9 @@ class ValidationApiService(
                 Timber.d("$TAG: getAppConfig response: $body")
                 val result = json.decodeFromString<ValidationBaseResponse<AppConfig>>(body)
                 if (result.isSuccess()) {
-                    Result.success(result.msg ?: throw Exception("Config data is null"))
+                    result.msg ?: throw Exception("Config data is null")
                 } else {
-                    Result.failure(Exception("API error: ${result.code}"))
+                    throw Exception("API error: ${result.code}")
                 }
             }
         }.onFailure {
@@ -166,9 +166,9 @@ class ValidationApiService(
                 Timber.d("$TAG: getNotice response: $body")
                 val result = json.decodeFromString<ValidationBaseResponse<NoticeResponse>>(body)
                 if (result.isSuccess()) {
-                    Result.success(result.msg?.getNotice() ?: "")
+                    result.msg?.getNotice() ?: ""
                 } else {
-                    Result.failure(Exception("API error: ${result.code}"))
+                    throw Exception("API error: ${result.code}")
                 }
             }
         }.onFailure {
@@ -200,9 +200,9 @@ class ValidationApiService(
                 Timber.d("$TAG: loginWithKami response: $body")
                 val result = json.decodeFromString<ValidationBaseResponse<KamiLoginResponse>>(body)
                 if (result.isSuccess()) {
-                    Result.success(result.msg ?: throw Exception("Login data is null"))
+                    result.msg ?: throw Exception("Login data is null")
                 } else {
-                    Result.failure(Exception("API error: ${result.code}"))
+                    throw Exception("API error: ${result.code}")
                 }
             }
         }.onFailure {
@@ -224,9 +224,9 @@ class ValidationApiService(
                 Timber.d("$TAG: getFileUrl response: $body")
                 val result = json.decodeFromString<ValidationBaseResponse<List<FileInfo>>>(body)
                 if (result.isSuccess()) {
-                    Result.success(result.msg ?: emptyList())
+                    result.msg ?: emptyList()
                 } else {
-                    Result.failure(Exception("API error: ${result.code}"))
+                    throw Exception("API error: ${result.code}")
                 }
             }
         }.onFailure {
