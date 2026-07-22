@@ -449,6 +449,7 @@
     <string name="settings_section_about">About</string>
     <string name="settings_about_version">Version</string>
     <string name="settings_about_developer">Developer</string>
+    <string name="settings_about_customer_service">Customer Service QQ</string>
     <string name="settings_about_qq_group_title">Feedback QQ Group</string>
     <string name="settings_about_qq_group_desc">Got issues or suggestions? Join the QQ group to discuss</string>
     <string name="settings_about_announcement">View Announcement</string>
