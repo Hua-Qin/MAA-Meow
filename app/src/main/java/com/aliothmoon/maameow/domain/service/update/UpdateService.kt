@@ -11,14 +11,11 @@ import com.aliothmoon.maameow.constant.MaaFiles
 import com.aliothmoon.maameow.data.achievement.AchievementEvents
 import com.aliothmoon.maameow.data.achievement.AchievementRepository
 import com.aliothmoon.maameow.data.api.CdkRequiredException
-import com.aliothmoon.maameow.data.api.HttpClientHelper
 import com.aliothmoon.maameow.data.api.MirrorChyanApiClient
 import com.aliothmoon.maameow.data.api.MirrorChyanBizException
 import com.aliothmoon.maameow.data.datasource.AppDownloader
 import com.aliothmoon.maameow.data.datasource.ResourceDownloader
 import com.aliothmoon.maameow.data.datasource.ZipExtractor
-import com.aliothmoon.maameow.data.datasource.update.GitHubAppDownloadUrlResolver
-import com.aliothmoon.maameow.data.datasource.update.GitHubResourceDownloadUrlResolver
 import com.aliothmoon.maameow.data.datasource.update.MirrorChyanAppDownloadUrlResolver
 import com.aliothmoon.maameow.data.datasource.update.MirrorChyanResourceDownloadUrlResolver
 import com.aliothmoon.maameow.data.model.update.UpdateChannel
@@ -49,7 +46,6 @@ class UpdateService(
     private val context: Context,
     apiClient: MirrorChyanApiClient,
     appSettingsManager: AppSettingsManager,
-    httpClient: HttpClientHelper,
     private val appVersionChecker: AppVersionChecker,
     private val resourceVersionChecker: ResourceVersionChecker,
     private val appDownloader: AppDownloader,
@@ -61,16 +57,14 @@ class UpdateService(
         UpdateSource.MIRROR_CHYAN to MirrorChyanAppDownloadUrlResolver(
             apiClient,
             appSettingsManager
-        ),
-        UpdateSource.GITHUB to GitHubAppDownloadUrlResolver(httpClient)
+        )
     )
 
     private val resourceDownloadResolvers: Map<UpdateSource, ResourceDownloadUrlResolver> = mapOf(
         UpdateSource.MIRROR_CHYAN to MirrorChyanResourceDownloadUrlResolver(
             apiClient,
             appSettingsManager
-        ),
-        UpdateSource.GITHUB to GitHubResourceDownloadUrlResolver()
+        )
     )
 
     // ==================== App 更新 ====================

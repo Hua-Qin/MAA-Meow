@@ -12,7 +12,7 @@ data class AppSettings(
 
     @PrefKey(default = "BACKGROUND") val runMode: String = "BACKGROUND",
 
-    @PrefKey(default = "GITHUB") val updateSource: String = "GITHUB",
+    @PrefKey(default = "2") val updateSource: String = "2",
 
     @PrefKey(default = "") val mirrorChyanCdk: String = "",
 

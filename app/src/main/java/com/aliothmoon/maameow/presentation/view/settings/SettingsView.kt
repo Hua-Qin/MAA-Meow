@@ -769,23 +769,6 @@ fun SettingsView(
                     ) {
                         onViewAnnouncement()
                     }
-                    ListItemDivider()
-                    Text(
-                        text = stringResource(R.string.settings_about_star),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = contentColor,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                Misc.openUriSafely(
-                                    context,
-                                    "https://github.com/Aliothmoon/MAA-Meow"
-                                )
-                            }
-                            .padding(vertical = MaaDesignTokens.Spacing.listItemVertical),
-                        textAlign = TextAlign.Center
-                    )
                 }
             }
 

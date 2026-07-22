@@ -596,13 +596,11 @@
     <string name="update_card_resource">MAA资源</string>
     <string name="update_card_check_button">检查更新</string>
     <string name="update_card_source_label">下载源</string>
-    <string name="update_source_github">GitHub</string>
     <string name="update_source_mirror_chyan">Mirror酱</string>
     <string name="update_channel_stable">稳定版</string>
     <string name="update_channel_beta">公测版</string>
     <string name="update_card_about_title">关于 %1$s</string>
     <string name="update_card_visit_site">前往官网</string>
-    <string name="update_card_github_desc">从 GitHub 官方仓库下载资源。适合网络环境良好的用户，可直接获取最新版本。</string>
     <string name="update_card_mirror_brand">Mirror酱</string>
     <string name="update_card_mirror_desc">是独立的第三方加速下载服务，需要付费使用，并非「MAA」收费。\n\n其运营成本由订阅收入支撑，部分收益将回馈项目开发者。欢迎订阅 CDK 享受高速下载，同时支持项目持续开发。\n\n选择 Mirror酱 作为下载源时需要填写 CDK。</string>
     <string name="update_card_about_source_cd">关于%1$s</string>
@@ -660,7 +658,6 @@
     <string name="settings_about_qq_group_desc">遇到问题或有建议？欢迎加群交流反馈</string>
     <string name="settings_about_customer_service">客服 QQ</string>
     <string name="settings_about_announcement">查看公告</string>
-    <string name="settings_about_star">⭐ 喜欢就给个 Star 吧</string>
 
     <!-- common: additional -->
     <string name="common_tab_general">常规设置</string>
@@ -1087,7 +1084,7 @@
     <string name="panel_reclamation_no_save_line2">2. 不要在生息演算的编队中有干员的情况下使用</string>
     <string name="panel_reclamation_no_save_line3">3. 手动确认存档情况并删除，以免 MAA 删除你的珍贵存档</string>
     <string name="panel_reclamation_no_save_line4">4. 导航还没写，不能从生息演算以外的位置开始任务</string>
-    <string name="panel_reclamation_no_save_line5">5. 如果任务过程中报错、点数没刷满就任务完成，请前往 GitHub 提交 Issue</string>
+    <string name="panel_reclamation_no_save_line5">5. 如果任务过程中报错、点数没刷满就任务完成，请向开发者反馈</string>
     <string name="panel_reclamation_with_save_title">有存档通过制造刷点数（高级设置）</string>
     <string name="panel_reclamation_with_save_line1">1. 要求是结算后的第一天，且后续三天没有敌袭进入驻扎地</string>
     <string name="panel_reclamation_with_save_line2">2. 必须在进入大地图后的界面开始（能看到驻扎地的界面）</string>
@@ -1537,8 +1534,6 @@
     <string name="update_error_service_unavailable">更新服务不可用</string>
     <string name="update_error_empty_data">数据为空</string>
     <string name="update_error_http_status">服务器返回错误 (HTTP %1$d)</string>
-    <string name="update_error_github_api_failed">GitHub API 请求失败 (HTTP %1$d)</string>
-    <string name="update_error_github_no_apk">Release 中未找到 APK 文件</string>
     <string name="update_error_empty_download_url">下载链接为空</string>
 
     <!-- i18n: log level (badge in log panel) -->
@@ -1772,7 +1767,7 @@
     <string name="achievement_ProblemFeedback_desc">一定要杜绝的是，来自内部的风险。</string>
     <string name="achievement_ProblemFeedback_condition">进行一次问题反馈</string>
     <string name="achievement_CdnTorture_title">网络折磨人</string>
-    <string name="achievement_CdnTorture_desc">比宇宙更远的地方，是 GitHub 的服务器。</string>
+    <string name="achievement_CdnTorture_desc">比宇宙更远的地方，是远端的服务器。</string>
     <string name="achievement_CdnTorture_condition">下载资源失败超过 3 次</string>
     <string name="achievement_BackstageExplorer_title">走进后台</string>
     <string name="achievement_BackstageExplorer_desc">让我看看都记了点啥。</string>

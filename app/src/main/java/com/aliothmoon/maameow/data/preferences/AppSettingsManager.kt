@@ -104,9 +104,9 @@ class AppSettingsManager(
             runCatching {
                 UpdateSource.entries
                     .find { it.type == s.updateSource.toInt() }
-                    ?: UpdateSource.GITHUB
+                    ?: UpdateSource.MIRROR_CHYAN
             }
-                .getOrDefault(UpdateSource.GITHUB)
+                .getOrDefault(UpdateSource.MIRROR_CHYAN)
         }
         .distinctUntilChanged()
         .stateIn(
@@ -114,9 +114,9 @@ class AppSettingsManager(
             runCatching {
                 UpdateSource.entries
                     .find { it.type == initialSettings.updateSource.toInt() }
-                    ?: UpdateSource.GITHUB
+                    ?: UpdateSource.MIRROR_CHYAN
             }
-                .getOrDefault(UpdateSource.GITHUB)
+                .getOrDefault(UpdateSource.MIRROR_CHYAN)
         )
 
     suspend fun setUpdateSource(source: UpdateSource) {

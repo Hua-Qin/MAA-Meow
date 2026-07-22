@@ -405,7 +405,6 @@ fun UpdateCard(
                             Misc.openUriSafely(
                                 context = context,
                                 uriString = when (source) {
-                                    UpdateSource.GITHUB -> "https://github.com/MaaAssistantArknights/MaaResource"
                                     UpdateSource.MIRROR_CHYAN -> "https://mirrorchyan.com/zh/projects?rid=MAA&os=android&channel=stable&source=maameow"
                                 }
                             )
@@ -423,12 +422,6 @@ fun UpdateCard(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 when (source) {
-                                    UpdateSource.GITHUB -> Text(
-                                        text = stringResource(R.string.update_card_github_desc),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        textAlign = TextAlign.Center
-                                    )
-
                                     UpdateSource.MIRROR_CHYAN -> {
                                         val mirrorBrand = stringResource(R.string.update_card_mirror_brand)
                                         val mirrorDesc = stringResource(R.string.update_card_mirror_desc)
