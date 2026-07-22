@@ -43,12 +43,12 @@ fun ValidationDialog(
     if (!isVisible) return
 
     var kamiInput by remember { mutableStateOf("") }
-    val isLoading = viewModel.isLoading.collectAsStateWithLifecycle()
-    val errorMessage = viewModel.errorMessage.collectAsStateWithLifecycle()
-    val loginSuccess = viewModel.loginSuccess.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val loginSuccess by viewModel.loginSuccess.collectAsStateWithLifecycle()
 
-    LaunchedEffect(loginSuccess.value) {
-        if (loginSuccess.value) {
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess) {
             viewModel.resetLoginSuccess()
             onLoginSuccess()
         }
@@ -102,13 +102,13 @@ fun ValidationDialog(
                     placeholder = { Text("请输入您的卡密") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    isError = errorMessage.value != null,
+                    isError = errorMessage != null,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                errorMessage.value?.let {
+                if (errorMessage != null) {
                     Text(
-                        text = it,
+                        text = errorMessage!!,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.fillMaxWidth()
@@ -117,10 +117,10 @@ fun ValidationDialog(
 
                 Button(
                     onClick = { viewModel.login() },
-                    enabled = !isLoading.value && kamiInput.isNotBlank(),
+                    enabled = !isLoading && kamiInput.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (isLoading.value) {
+                    if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp
