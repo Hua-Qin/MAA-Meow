@@ -15,7 +15,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aliothmoon.maameow.R
 
@@ -106,9 +106,9 @@ fun ValidationDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (errorMessage != null) {
+                errorMessage?.let { msg ->
                     Text(
-                        text = errorMessage!!,
+                        text = msg,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.fillMaxWidth()
@@ -117,7 +117,7 @@ fun ValidationDialog(
 
                 Button(
                     onClick = { viewModel.login() },
-                    enabled = !isLoading && kamiInput.isNotBlank(),
+                    enabled = isLoading.not() && kamiInput.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (isLoading) {
