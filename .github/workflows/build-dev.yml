@@ -64,17 +64,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $TAG_ARG = ""
+          $args = @("--clean")
           $MAA_TAG = "${{ github.event.inputs.maa_tag }}"
           if ($MAA_TAG -ne $null -and $MAA_TAG -ne "latest") {
-            $TAG_ARG = "--tag $MAA_TAG"
+            $args += "--tag", $MAA_TAG
           }
           $MAA_REPO = "${{ github.event.inputs.maa_repo }}"
-          $REPO_ARG = ""
-          if ($MAA_REPO -ne $null) {
-            $REPO_ARG = "--repo $MAA_REPO"
+          if ($MAA_REPO -ne $null -and $MAA_REPO -ne "MaaAssistantArknights/MaaAssistantArknights") {
+            $args += "--repo", $MAA_REPO
           }
-          python scripts/setup_maa_core.py --clean $TAG_ARG $REPO_ARG
+          python scripts/setup_maa_core.py $args
 
       - name: Print MAA Resource version
         run: cat app/src/main/assets/MaaSync/MaaResource/version.json
