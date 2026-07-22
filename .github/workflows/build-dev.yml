@@ -21,7 +21,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -64,16 +64,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_ARG=""
-          MAA_TAG="${{ github.event.inputs.maa_tag }}"
-          if [ -n "$MAA_TAG" ] && [ "$MAA_TAG" != "latest" ]; then
-            TAG_ARG="--tag $MAA_TAG"
-          fi
-          MAA_REPO="${{ github.event.inputs.maa_repo }}"
-          REPO_ARG=""
-          if [ -n "$MAA_REPO" ]; then
-            REPO_ARG="--repo $MAA_REPO"
-          fi
+          $TAG_ARG = ""
+          $MAA_TAG = "${{ github.event.inputs.maa_tag }}"
+          if ($MAA_TAG -ne $null -and $MAA_TAG -ne "latest") {
+            $TAG_ARG = "--tag $MAA_TAG"
+          }
+          $MAA_REPO = "${{ github.event.inputs.maa_repo }}"
+          $REPO_ARG = ""
+          if ($MAA_REPO -ne $null) {
+            $REPO_ARG = "--repo $MAA_REPO"
+          }
           python scripts/setup_maa_core.py --clean $TAG_ARG $REPO_ARG
 
       - name: Print MAA Resource version
@@ -81,8 +81,7 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          chmod +x ./gradlew
-          ./gradlew clean assembleDebug
+          .\gradlew.bat clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
