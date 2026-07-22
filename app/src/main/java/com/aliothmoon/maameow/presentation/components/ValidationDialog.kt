@@ -104,9 +104,9 @@ fun ValidationDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (errorMessage != null) {
+                errorMessage?.let {
                     Text(
-                        text = errorMessage!!,
+                        text = it,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.fillMaxWidth()
@@ -115,7 +115,7 @@ fun ValidationDialog(
 
                 Button(
                     onClick = { viewModel.login() },
-                    enabled = !isLoading && kamiInput.isNotBlank(),
+                    enabled = isLoading.not() && kamiInput.isNotBlank(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (isLoading) {
